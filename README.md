@@ -4,7 +4,7 @@
 In the shadows of the official clojure tools:
 
 ```
-const version = "1.10.1.478"
+const version = "1.10.1.486"
 ```
 
 
@@ -28,8 +28,15 @@ Plan is to keep this project up to date with _clojure/brew-install_ changes.
 
 Any requests/PRs for features are welcome, as long as they do not stray from the plan.
 
+## Why this?
 
-## Is it only for Windows?
+### Is there something different compared to official deps cli tools?
+
+- An easy entrance to clojure world for go users. If you are a go user you are one command line away from clojured happiness.
+- Resolve Windows quoting differences. No need to think quotes-translation-for-Windows. One clojure/clj tools command to run anywhere. So pick a published deps cli example on the internet and run it directly on Windows (99% of the deps-cli clojure examples are directed to POSIX users anyways).
+- A pretty clojure repl. Use rebel when you want to view/display a prettier clojure dev UI.
+
+### Is it only for Windows?
 
 TL;DR. No, it is for any platform, but on Windows has some specific features.
 
