@@ -49,6 +49,7 @@ type depOpts struct {
 	ResolveTags      bool
 	Verbose          bool
 	Describe         bool
+	Trace            bool
 	InvalidOption    string
 }
 
@@ -201,6 +202,8 @@ func setDepOpts(all *allOpts, args []string, pos int) (int, error) {
 			all.Dep.Verbose = true
 		} else if args[pos] == "-Sdescribe" {
 			all.Dep.Describe = true
+		} else if args[pos] == "-Strace" {
+			all.Dep.Trace = true
 		} else if strings.HasPrefix(args[pos], "-S") {
 			return pos, errors.New("invalid option:" + args[pos])
 		} else {
@@ -390,6 +393,8 @@ func use(options *allOpts) error {
 		if err != nil {
 			return err
 		}
+	} else if options.Dep.Trace {
+		fmt.Println("Writing trace.edn")
 	} else {
 		jvmCacheOpts := []string{}
 		if fileExists(config.jvmFile) {
@@ -445,7 +450,7 @@ func checksumOf(options *allOpts, configPaths []string) string {
 
 func isStale(options *allOpts, config t4cConfig, configPaths []string) (bool, error) {
 	stale := false
-	if options.Dep.Force || !fileExists(config.cpFile) {
+	if options.Dep.Force || options.Dep.Trace || !fileExists(config.cpFile) {
 		stale = true
 	} else {
 		for _, path := range configPaths {
@@ -485,6 +490,9 @@ func buildToolsArgs(config *t4cConfig, stale bool, options *allOpts) {
 		}
 		if len(options.Dep.ForceCP) > 0 {
 			config.toolsArgs = append(config.toolsArgs, "--skip-cp")
+		}
+		if options.Dep.Trace {
+			config.toolsArgs = append(config.toolsArgs, "--trace")
 		}
 	}
 }

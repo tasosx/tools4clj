@@ -48,6 +48,7 @@ The dep-opts are used to build the java-opts and classpath:
   -Sresolve-tags Resolve git coordinate tags to shas and update deps.edn
   -Sverbose      Print important path info to console
   -Sdescribe     Print environment and command parsing info as data
+  -Strace        Write a trace.edn file that traces deps expansion
 
 init-opt:
   -i, --init path      Load a file or resource
@@ -75,7 +76,7 @@ For more info, see:
 `
 
 const (
-	version        = "1.10.1.486"
+	version        = "1.10.1.489"
 	depsEDN        = "deps.edn"
 	exampleDepsEDN = "example-deps.edn"
 	toolsTarGz     = "clojure-tools-" + version + ".tar.gz"

@@ -342,6 +342,7 @@ var testDepItems = []TestReadItem{
 			"-Sresolve-tags",
 			"-Sverbose",
 			"-Sdescribe",
+			"-Strace",
 		},
 		allOpts{
 			Dep: depOpts{
@@ -361,6 +362,7 @@ var testDepItems = []TestReadItem{
 				ResolveTags:      true,
 				Verbose:          true,
 				Describe:         true,
+				Trace:            true,
 			},
 			Init:       initOpts{},
 			Main:       mainOpts{},
@@ -852,6 +854,7 @@ func TestIsStale(t *testing.T) {
 	// forced cp
 	// inputs
 	options.Dep.Force = true
+	options.Dep.Trace = false
 	config.cpFile = cpFile
 	configPaths = []string{newerFile}
 	// output
@@ -866,9 +869,28 @@ func TestIsStale(t *testing.T) {
 		t.Errorf("isStale failed, expected %v, got %v", expected, res)
 	}
 
+	// trace
+	// inputs
+	options.Dep.Force = false
+	options.Dep.Trace = true
+	config.cpFile = cpFile
+	configPaths = []string{newerFile}
+	// output
+	expected = true
+
+	res, err = isStale(&options, config, configPaths)
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+		t.FailNow()
+	}
+	if res != expected {
+		t.Errorf("isStale failed, expected %v, got %v", expected, res)
+	}
+
 	// not existing cpFile
 	// inputs
 	options.Dep.Force = false
+	options.Dep.Trace = false
 	config.cpFile = "notexisting_cpFile.edn"
 	configPaths = []string{newerFile}
 	// output
@@ -886,6 +908,7 @@ func TestIsStale(t *testing.T) {
 	// existing cpFile, not existing config paths file
 	// inputs
 	options.Dep.Force = false
+	options.Dep.Trace = false
 	config.cpFile = cpFile
 	configPaths = []string{"notexisting_file.edn"}
 	// output
@@ -903,6 +926,7 @@ func TestIsStale(t *testing.T) {
 	// existing cpFile, existing older config paths file
 	// inputs
 	options.Dep.Force = false
+	options.Dep.Trace = false
 	config.cpFile = cpFile
 	configPaths = []string{olderFile}
 	// output
@@ -920,6 +944,7 @@ func TestIsStale(t *testing.T) {
 	// existing cpFile, existing newer config paths file
 	// inputs
 	options.Dep.Force = false
+	options.Dep.Trace = false
 	config.cpFile = cpFile
 	configPaths = []string{newerFile}
 	// output
@@ -937,6 +962,7 @@ func TestIsStale(t *testing.T) {
 	// existing cpFile, existing at least one newer config paths file
 	// inputs
 	options.Dep.Force = false
+	options.Dep.Trace = false
 	config.cpFile = cpFile
 	configPaths = []string{olderFile, newerFile}
 	// output
