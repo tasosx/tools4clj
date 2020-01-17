@@ -25,7 +25,7 @@ func TestResolveTagsCmd(t *testing.T) {
 	// test args
 	{
 		expected := []string{
-			javaPath, "-Xms256m", "-classpath", toolsCpDir,
+			javaPath, "-classpath", toolsCpDir,
 			"clojure.main",
 			"-m", "clojure.tools.deps.alpha.script.resolve-tags",
 			"--deps-file=deps.edn",
@@ -68,7 +68,7 @@ func TestMakeClassPathCmd(t *testing.T) {
 	// test args
 	{
 		expected := []string{
-			javaPath, "-Xms256m", "-classpath", toolsCpDir,
+			javaPath, "-classpath", toolsCpDir,
 			"clojure.main",
 			"-m", "clojure.tools.deps.alpha.script.make-classpath2",
 			"--config-user", conf.configUser,
@@ -114,7 +114,7 @@ func TestGeneratePomCmd(t *testing.T) {
 	// test args
 	{
 		expected := []string{
-			javaPath, "-Xms256m", "-classpath", toolsCpDir,
+			javaPath, "-classpath", toolsCpDir,
 			"clojure.main",
 			"-m", "clojure.tools.deps.alpha.script.generate-manifest2",
 			"--config-user", conf.configUser,
@@ -149,7 +149,7 @@ func TestPrintTreeCmd(t *testing.T) {
 	// test args
 	{
 		expected := []string{
-			javaPath, "-Xms256m", "-classpath", toolsCpDir,
+			javaPath, "-classpath", toolsCpDir,
 			"clojure.main",
 			"-m", "clojure.tools.deps.alpha.script.print-tree",
 			"--libs-file", conf.libsFile,

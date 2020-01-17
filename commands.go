@@ -21,7 +21,7 @@ import (
 )
 
 func resolveTagsCmd(toolsClassPath string) exec.Cmd {
-	var cmd = exec.Command(javaPath, "-Xms256m", "-classpath", toolsClassPath,
+	var cmd = exec.Command(javaPath, "-classpath", toolsClassPath,
 		"clojure.main",
 		"-m", "clojure.tools.deps.alpha.script.resolve-tags",
 		"--deps-file=deps.edn")
@@ -30,7 +30,7 @@ func resolveTagsCmd(toolsClassPath string) exec.Cmd {
 }
 
 func makeClassPathCmd(conf *t4cConfig, toolsClassPath string) exec.Cmd {
-	cmdArgs := append([]string{}, "-Xms256m", "-classpath", toolsClassPath,
+	cmdArgs := append([]string{}, "-classpath", toolsClassPath,
 		"clojure.main",
 		"-m", "clojure.tools.deps.alpha.script.make-classpath2",
 		"--config-user", conf.configUser,
@@ -49,7 +49,7 @@ func makeClassPathCmd(conf *t4cConfig, toolsClassPath string) exec.Cmd {
 }
 
 func generatePomCmd(conf *t4cConfig, toolsClassPath string) exec.Cmd {
-	cmdArgs := append([]string{}, "-Xms256m", "-classpath", toolsClassPath,
+	cmdArgs := append([]string{}, "-classpath", toolsClassPath,
 		"clojure.main",
 		"-m", "clojure.tools.deps.alpha.script.generate-manifest2",
 		"--config-user", conf.configUser,
@@ -65,7 +65,7 @@ func generatePomCmd(conf *t4cConfig, toolsClassPath string) exec.Cmd {
 }
 
 func printTreeCmd(conf *t4cConfig, toolsClassPath string) exec.Cmd {
-	var cmd = exec.Command(javaPath, "-Xms256m", "-classpath", toolsClassPath,
+	var cmd = exec.Command(javaPath, "-classpath", toolsClassPath,
 		"clojure.main",
 		"-m", "clojure.tools.deps.alpha.script.print-tree",
 		"--libs-file", conf.libsFile)
