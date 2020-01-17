@@ -21,7 +21,8 @@ import (
 	"runtime"
 )
 
-const usage = `
+const usage = `Version: ` + version + ` of clojure tools
+
 Usage:  clojure [t4c-opt*] [dep-opt*] [init-opt*] [main-opt] [arg*]
         clj     [t4c-opt*] [dep-opt*] [init-opt*] [main-opt] [arg*]
 
@@ -76,7 +77,7 @@ For more info, see:
 `
 
 const (
-	version        = "1.10.1.496"
+	version        = "1.10.1.492"
 	depsEDN        = "deps.edn"
 	exampleDepsEDN = "example-deps.edn"
 	toolsTarGz     = "clojure-tools-" + version + ".tar.gz"
