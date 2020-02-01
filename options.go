@@ -49,6 +49,7 @@ type depOpts struct {
 	ResolveTags      bool
 	Verbose          bool
 	Describe         bool
+	Threads          int
 	Trace            bool
 	InvalidOption    string
 }
@@ -202,6 +203,19 @@ func setDepOpts(all *allOpts, args []string, pos int) (int, error) {
 			all.Dep.Verbose = true
 		} else if args[pos] == "-Sdescribe" {
 			all.Dep.Describe = true
+		} else if args[pos] == "-Sthreads" {
+			if all.Dep.Threads > 0 {
+				return pos, errors.New("threads option " + args[pos] + " defined more than one time")
+			}
+			if pos+1 > len(args)-1 {
+				return pos, errors.New("threads value (N) not defined for -Sthreads option")
+			}
+			pos++
+			i, err := strconv.Atoi(args[pos])
+			if err != nil {
+				return pos, errors.New("threads value '" + args[pos] + "' is not a number")
+			}
+			all.Dep.Threads = i
 		} else if args[pos] == "-Strace" {
 			all.Dep.Trace = true
 		} else if strings.HasPrefix(args[pos], "-S") {
@@ -490,6 +504,10 @@ func buildToolsArgs(config *t4cConfig, stale bool, options *allOpts) {
 		}
 		if len(options.Dep.ForceCP) > 0 {
 			config.toolsArgs = append(config.toolsArgs, "--skip-cp")
+		}
+		if options.Dep.Threads > 0 {
+			config.toolsArgs = append(config.toolsArgs, "--threads")
+			config.toolsArgs = append(config.toolsArgs, strconv.Itoa(options.Dep.Threads))
 		}
 		if options.Dep.Trace {
 			config.toolsArgs = append(config.toolsArgs, "--trace")

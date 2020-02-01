@@ -6,6 +6,10 @@ https://github.com/clojure/brew-install/blob/1.10.1/CHANGELOG.md
 
 ## Releases
 
+- Seventh release [2020-02-01]
+    - Based on clojure tools v.1.10.1.507
+    - Add -Sthreads option for concurrent downloads
+
 - Sixth release [2020-01-21]
     - Based on clojure tools v.1.10.1.502
 

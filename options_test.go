@@ -342,6 +342,8 @@ var testDepItems = []TestReadItem{
 			"-Sresolve-tags",
 			"-Sverbose",
 			"-Sdescribe",
+			"-Sthreads",
+			"42",
 			"-Strace",
 		},
 		allOpts{
@@ -362,6 +364,7 @@ var testDepItems = []TestReadItem{
 				ResolveTags:      true,
 				Verbose:          true,
 				Describe:         true,
+				Threads:          42,
 				Trace:            true,
 			},
 			Init:       initOpts{},
@@ -431,7 +434,25 @@ var testDepItems = []TestReadItem{
 			Rlwrap:     false,
 		},
 		"classpath option -Scp defined more than one time",
-	}, { // missing value for Dep option: -Sdeps
+	},
+	{ // not valid Dep multiple option: -Sthreads
+		[]string{"clojure",
+			"-Sthreads",
+			`1`,
+			"-Sthreads",
+			`5`,
+		},
+		allOpts{
+			Dep:        depOpts{},
+			Init:       initOpts{},
+			Main:       mainOpts{},
+			Args:       []string{},
+			NativeArgs: true,
+			Rlwrap:     false,
+		},
+		"threads option -Sthreads defined more than one time",
+	},
+	{ // missing value for Dep option: -Sdeps
 		[]string{"clojure",
 			"-Sdeps",
 		},
@@ -458,6 +479,35 @@ var testDepItems = []TestReadItem{
 			Rlwrap:     false,
 		},
 		"classpath value (CP) not defined for -Scp option",
+	},
+	{ // missing value for Dep option: -Sthreads
+		[]string{"clojure",
+			"-Sthreads",
+		},
+		allOpts{
+			Dep:        depOpts{},
+			Init:       initOpts{},
+			Main:       mainOpts{},
+			Args:       []string{},
+			NativeArgs: true,
+			Rlwrap:     false,
+		},
+		"threads value (N) not defined for -Sthreads option",
+	},
+	{ // not a number value for Dep option: -Sthreads
+		[]string{"clojure",
+			"-Sthreads",
+			"not-a-number",
+		},
+		allOpts{
+			Dep:        depOpts{},
+			Init:       initOpts{},
+			Main:       mainOpts{},
+			Args:       []string{},
+			NativeArgs: true,
+			Rlwrap:     false,
+		},
+		"threads value '" + "not-a-number" + "' is not a number",
 	},
 	{ // dep main alliases along with help option
 		[]string{"clojure",
@@ -989,6 +1039,8 @@ func TestBuildToolsArgs(t *testing.T) {
 			AllAliases:       ":argA",
 			ForceCP:          "forced-class-path",
 			Pom:              false,
+			Threads:          42,
+			Trace:            true,
 		},
 	}
 	config := t4cConfig{}
@@ -1020,6 +1072,9 @@ func TestBuildToolsArgs(t *testing.T) {
 		"-M:argM",
 		"-A:argA",
 		"--skip-cp",
+		"--threads",
+		"42",
+		"--trace",
 	}
 
 	buildToolsArgs(&config, stale, &options)
@@ -1042,6 +1097,9 @@ func TestBuildToolsArgs(t *testing.T) {
 		"-M:argM",
 		"-A:argA",
 		"--skip-cp",
+		"--threads",
+		"42",
+		"--trace",
 	}
 
 	buildToolsArgs(&config, stale, &options)
