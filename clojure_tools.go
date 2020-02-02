@@ -23,8 +23,8 @@ import (
 
 const usage = `Version: ` + version + ` of clojure tools
 
-Usage:  clojure [t4c-opt*] [dep-opt*] [init-opt*] [main-opt] [arg*]
-        clj     [t4c-opt*] [dep-opt*] [init-opt*] [main-opt] [arg*]
+Usage:  clojure [t4c-opt*] [dep-opt*] [--] [init-opt*] [main-opt] [arg*]
+        clj     [t4c-opt*] [dep-opt*] [--] [init-opt*] [main-opt] [arg*]
 
 clojure executable is a runner for Clojure. clj is its wrapper
 for interactive repl use. These executables ultimately 
@@ -51,6 +51,7 @@ The dep-opts are used to build the java-opts and classpath:
   -Sdescribe     Print environment and command parsing info as data
   -Sthreads N    Set specific number of download threads
   -Strace        Write a trace.edn file that traces deps expansion
+  --             Stop parsing dep options and pass remaining arguments to clojure.main
 
 init-opt:
   -i, --init path      Load a file or resource

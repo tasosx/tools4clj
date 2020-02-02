@@ -65,7 +65,6 @@ type mainOpts struct {
 	Repl     bool
 	Help     bool
 	HelpArg  string
-	PathArg  string
 }
 
 func read(all *allOpts, args []string, cljRun bool) error {
@@ -220,6 +219,10 @@ func setDepOpts(all *allOpts, args []string, pos int) (int, error) {
 			all.Dep.Trace = true
 		} else if strings.HasPrefix(args[pos], "-S") {
 			return pos, errors.New("invalid option:" + args[pos])
+		} else if args[pos] == "--" {
+			// explicit move to the next options group
+			pos++
+			break
 		} else {
 			// move to the next options group
 			break
@@ -296,9 +299,8 @@ func setMainOpts(all *allOpts, args []string, pos int) (int, error) {
 			all.Main.Help = true
 			all.Main.HelpArg = args[pos]
 		} else {
-			// get current option [should either be - or a path]
-			// and move to the next options group
-			all.Main.PathArg = args[pos]
+			// move to the next options group
+			break
 		}
 		pos++
 		break
@@ -430,7 +432,6 @@ func use(options *allOpts) error {
 		clojureArgs := []string{}
 		clojureArgs = append(clojureArgs, getInitArgs(options)...)
 		clojureArgs = append(clojureArgs, options.Main.MainArgs...)
-		clojureArgs = append(clojureArgs, options.Main.PathArg)
 		clojureArgs = append(clojureArgs, options.Args...)
 
 		err := safeStart(clojureCmd(jvmCacheOpts, options.Dep.JvmOpts, config.libsFile,
