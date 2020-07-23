@@ -24,7 +24,7 @@ import (
 )
 
 type allOpts struct {
-	Dep        depOpts
+	Clj        cljOpts
 	Init       initOpts
 	Main       mainOpts
 	Args       []string
@@ -32,13 +32,15 @@ type allOpts struct {
 	Rlwrap     bool
 }
 
-type depOpts struct {
+type cljOpts struct {
 	JvmOpts          []string
 	JvmAliases       string
 	ResolveAliases   string
 	ClassPathAliases string
 	MainAliases      string
+	ToolAliases      string
 	AllAliases       string
+	ExecAlias        []string
 	DepsData         string
 	PrintClassPath   bool
 	ForceCP          string
@@ -86,7 +88,7 @@ func read(all *allOpts, args []string, cljRun bool) error {
 		os.Exit(1)
 	}
 
-	i, err = setDepOpts(all, args, i)
+	i, err = setCljOpts(all, args, i)
 	if err != nil {
 		return err
 	}
@@ -101,7 +103,7 @@ func read(all *allOpts, args []string, cljRun bool) error {
 		return err
 	}
 
-	if all.Main.Help && (len(all.Dep.MainAliases) > 0 || len(all.Dep.AllAliases) > 0) {
+	if all.Main.Help && (len(all.Clj.MainAliases) > 0 || len(all.Clj.AllAliases) > 0) {
 		all.Main.Help = false
 		all.Args = append(all.Args, all.Main.HelpArg)
 		return nil
@@ -133,7 +135,7 @@ func setT4COpts(all *allOpts, args []string, pos int, cljRun bool) (int, error) 
 			}
 
 			all.Rlwrap = false
-			all.Dep.DepsData = rebelSdepsArg
+			all.Clj.DepsData = rebelSdepsArg
 			all.Main.MainArgs = append(all.Main.MainArgs, "-m", rebelMainArg)
 
 			rebel = true
@@ -150,60 +152,68 @@ func setT4COpts(all *allOpts, args []string, pos int, cljRun bool) (int, error) 
 	return pos, nil
 }
 
-func setDepOpts(all *allOpts, args []string, pos int) (int, error) {
+func setCljOpts(all *allOpts, args []string, pos int) (int, error) {
 	for {
 		if pos >= len(args) {
 			break
 		}
 
 		if strings.HasPrefix(args[pos], "-J") {
-			all.Dep.JvmOpts = append(all.Dep.JvmOpts, strings.TrimPrefix(args[pos], "-J"))
+			all.Clj.JvmOpts = append(all.Clj.JvmOpts, strings.TrimPrefix(args[pos], "-J"))
 		} else if strings.HasPrefix(args[pos], "-O") {
-			all.Dep.JvmAliases += strings.TrimPrefix(args[pos], "-O")
+			all.Clj.JvmAliases += strings.TrimPrefix(args[pos], "-O")
 		} else if strings.HasPrefix(args[pos], "-R") {
-			all.Dep.ResolveAliases += strings.TrimPrefix(args[pos], "-R")
+			all.Clj.ResolveAliases += strings.TrimPrefix(args[pos], "-R")
 		} else if strings.HasPrefix(args[pos], "-C") {
-			all.Dep.ClassPathAliases += strings.TrimPrefix(args[pos], "-C")
+			all.Clj.ClassPathAliases += strings.TrimPrefix(args[pos], "-C")
 		} else if strings.HasPrefix(args[pos], "-M") {
-			all.Dep.MainAliases += strings.TrimPrefix(args[pos], "-M")
+			all.Clj.MainAliases += strings.TrimPrefix(args[pos], "-M")
+		} else if strings.HasPrefix(args[pos], "-T") {
+			all.Clj.ToolAliases += strings.TrimPrefix(args[pos], "-T")
 		} else if strings.HasPrefix(args[pos], "-A") {
-			all.Dep.AllAliases += strings.TrimPrefix(args[pos], "-A")
+			all.Clj.AllAliases += strings.TrimPrefix(args[pos], "-A")
+		} else if strings.HasPrefix(args[pos], "-X") {
+			all.Clj.ExecAlias = append(all.Clj.ExecAlias, strings.TrimPrefix(args[pos], "-X"))
+			for pos < len(args)-1 && !strings.HasPrefix(args[pos+1], "-") {
+				pos++
+				all.Clj.ExecAlias = append(all.Clj.ExecAlias, args[pos])
+			}
 		} else if args[pos] == "-Sdeps" {
-			if len(all.Dep.DepsData) > 0 {
+			if len(all.Clj.DepsData) > 0 {
 				return pos, errors.New("deps data option " + args[pos] + " defined more than one time")
 			}
 			if pos+1 > len(args)-1 {
 				return pos, errors.New("deps data value (EDN) not defined for -Sdeps option")
 			}
 			pos++
-			all.Dep.DepsData = args[pos]
+			all.Clj.DepsData = args[pos]
 		} else if args[pos] == "-Spath" {
-			all.Dep.PrintClassPath = true
+			all.Clj.PrintClassPath = true
 		} else if args[pos] == "-Scp" {
-			if len(all.Dep.ForceCP) > 0 {
+			if len(all.Clj.ForceCP) > 0 {
 				return pos, errors.New("classpath option " + args[pos] + " defined more than one time")
 			}
 			if pos+1 > len(args)-1 {
 				return pos, errors.New("classpath value (CP) not defined for -Scp option")
 			}
 			pos++
-			all.Dep.ForceCP = args[pos]
+			all.Clj.ForceCP = args[pos]
 		} else if args[pos] == "-Srepro" {
-			all.Dep.Repro = true
+			all.Clj.Repro = true
 		} else if args[pos] == "-Sforce" {
-			all.Dep.Force = true
+			all.Clj.Force = true
 		} else if args[pos] == "-Spom" {
-			all.Dep.Pom = true
+			all.Clj.Pom = true
 		} else if args[pos] == "-Stree" {
-			all.Dep.Tree = true
+			all.Clj.Tree = true
 		} else if args[pos] == "-Sresolve-tags" {
-			all.Dep.ResolveTags = true
+			all.Clj.ResolveTags = true
 		} else if args[pos] == "-Sverbose" {
-			all.Dep.Verbose = true
+			all.Clj.Verbose = true
 		} else if args[pos] == "-Sdescribe" {
-			all.Dep.Describe = true
+			all.Clj.Describe = true
 		} else if args[pos] == "-Sthreads" {
-			if all.Dep.Threads > 0 {
+			if all.Clj.Threads > 0 {
 				return pos, errors.New("threads option " + args[pos] + " defined more than one time")
 			}
 			if pos+1 > len(args)-1 {
@@ -214,9 +224,9 @@ func setDepOpts(all *allOpts, args []string, pos int) (int, error) {
 			if err != nil {
 				return pos, errors.New("threads value '" + args[pos] + "' is not a number")
 			}
-			all.Dep.Threads = i
+			all.Clj.Threads = i
 		} else if args[pos] == "-Strace" {
-			all.Dep.Trace = true
+			all.Clj.Trace = true
 		} else if strings.HasPrefix(args[pos], "-S") {
 			return pos, errors.New("invalid option:" + args[pos])
 		} else if args[pos] == "--" {
@@ -311,7 +321,7 @@ func setMainOpts(all *allOpts, args []string, pos int) (int, error) {
 
 func use(options *allOpts) error {
 	// Execute resolve-tags command
-	if options.Dep.ResolveTags {
+	if options.Clj.ResolveTags {
 		if fileExists("deps.edn") == false {
 			return errors.New("deps.edn does not exist")
 		}
@@ -333,7 +343,7 @@ func use(options *allOpts) error {
 
 	// Chain deps.edn in config paths. repro=skip config dir
 	config.configProject = "deps.edn"
-	configPaths := getConfigPaths(&config, configDir, tools4CljDir, options.Dep.Repro)
+	configPaths := getConfigPaths(&config, configDir, tools4CljDir, options.Clj.Repro)
 
 	// Determine whether to use user or project cache
 	cacheDir := ""
@@ -355,7 +365,7 @@ func use(options *allOpts) error {
 	// libsFile, cpFile, jvmFile, mainFile
 	buildCmdConfigs(&config, cacheDir, ck)
 
-	if options.Dep.Verbose {
+	if options.Clj.Verbose {
 		fmt.Println("version      = " + version)
 		fmt.Println("install_dir  = " + tools4CljDir)
 		fmt.Println("config_dir   = " + configDir)
@@ -374,8 +384,8 @@ func use(options *allOpts) error {
 	buildToolsArgs(&config, stale, options)
 
 	// If stale, run make-classpath to refresh cached classpath
-	if stale && !options.Dep.Describe {
-		if options.Dep.Verbose {
+	if stale && !options.Clj.Describe {
+		if options.Clj.Verbose {
 			fmt.Println("Refreshing classpath")
 		}
 		err := start(makeClassPathCmd(&config, toolsCp))
@@ -391,26 +401,40 @@ func use(options *allOpts) error {
 	}
 
 	// Finally...
-	if options.Dep.Pom {
+	if options.Clj.Pom {
 		err := start(generatePomCmd(&config, toolsCp))
 		if err != nil {
 			return err
 		}
-	} else if options.Dep.PrintClassPath {
+	} else if options.Clj.PrintClassPath {
 		fmt.Println(cp)
-	} else if options.Dep.Describe {
+	} else if options.Clj.Describe {
 		pathVector := ""
 		for _, configPath := range configPaths {
 			pathVector += "\"" + configPath + "\" "
 		}
 		fmt.Println(argsDescription(pathVector, tools4CljDir, configDir, cacheDir, &config, options))
-	} else if options.Dep.Tree {
+	} else if options.Clj.Tree {
 		err := start(printTreeCmd(&config, toolsCp))
 		if err != nil {
 			return err
 		}
-	} else if options.Dep.Trace {
+	} else if options.Clj.Trace {
 		fmt.Println("Writing trace.edn")
+	} else if len(options.Clj.ExecAlias) > 0 {
+		jvmCacheOpts := []string{}
+		if fileExists(config.jvmFile) {
+			b, err := ioutil.ReadFile(config.jvmFile)
+			if err != nil {
+				return err
+			}
+			jvmCacheOpts = strings.Split(string(b), " ")
+		}
+		err := safeStart(clojureExecuteCmd(jvmCacheOpts, options.Clj.JvmOpts,
+			config.basisFile, cp, options.Clj.ExecAlias))
+		if err != nil {
+			return err
+		}
 	} else {
 		jvmCacheOpts := []string{}
 		if fileExists(config.jvmFile) {
@@ -434,7 +458,8 @@ func use(options *allOpts) error {
 		clojureArgs = append(clojureArgs, options.Main.MainArgs...)
 		clojureArgs = append(clojureArgs, options.Args...)
 
-		err := safeStart(clojureCmd(jvmCacheOpts, options.Dep.JvmOpts, config.libsFile,
+		err := safeStart(clojureCmd(jvmCacheOpts, options.Clj.JvmOpts,
+			config.libsFile, config.basisFile,
 			cp, mainCacheOpts, clojureArgs, options.Rlwrap))
 		if err != nil {
 			return err
@@ -446,12 +471,13 @@ func use(options *allOpts) error {
 
 func checksumOf(options *allOpts, configPaths []string) string {
 	prep := join([]string{
-		options.Dep.ResolveAliases,
-		options.Dep.ClassPathAliases,
-		options.Dep.AllAliases,
-		options.Dep.JvmAliases,
-		options.Dep.MainAliases,
-		options.Dep.DepsData}, "|")
+		options.Clj.ResolveAliases,
+		options.Clj.ClassPathAliases,
+		options.Clj.AllAliases,
+		options.Clj.JvmAliases,
+		options.Clj.MainAliases,
+		options.Clj.ToolAliases,
+		options.Clj.DepsData}, "|")
 	for _, v := range configPaths {
 		if fileExists(v) {
 			prep += "|" + v
@@ -465,7 +491,7 @@ func checksumOf(options *allOpts, configPaths []string) string {
 
 func isStale(options *allOpts, config t4cConfig, configPaths []string) (bool, error) {
 	stale := false
-	if options.Dep.Force || options.Dep.Trace || !fileExists(config.cpFile) {
+	if options.Clj.Force || options.Clj.Trace || !fileExists(config.cpFile) {
 		stale = true
 	} else {
 		for _, path := range configPaths {
@@ -483,34 +509,37 @@ func isStale(options *allOpts, config t4cConfig, configPaths []string) (bool, er
 }
 
 func buildToolsArgs(config *t4cConfig, stale bool, options *allOpts) {
-	if stale || options.Dep.Pom {
+	if stale || options.Clj.Pom {
 		config.toolsArgs = []string{}
-		if len(options.Dep.DepsData) > 0 {
-			config.toolsArgs = append(config.toolsArgs, "--config-data", options.Dep.DepsData)
+		if len(options.Clj.DepsData) > 0 {
+			config.toolsArgs = append(config.toolsArgs, "--config-data", options.Clj.DepsData)
 		}
-		if len(options.Dep.ResolveAliases) > 0 {
-			config.toolsArgs = append(config.toolsArgs, "-R"+options.Dep.ResolveAliases)
+		if len(options.Clj.ResolveAliases) > 0 {
+			config.toolsArgs = append(config.toolsArgs, "-R"+options.Clj.ResolveAliases)
 		}
-		if len(options.Dep.ClassPathAliases) > 0 {
-			config.toolsArgs = append(config.toolsArgs, "-C"+options.Dep.ClassPathAliases)
+		if len(options.Clj.ClassPathAliases) > 0 {
+			config.toolsArgs = append(config.toolsArgs, "-C"+options.Clj.ClassPathAliases)
 		}
-		if len(options.Dep.JvmAliases) > 0 {
-			config.toolsArgs = append(config.toolsArgs, "-J"+options.Dep.JvmAliases)
+		if len(options.Clj.JvmAliases) > 0 {
+			config.toolsArgs = append(config.toolsArgs, "-J"+options.Clj.JvmAliases)
 		}
-		if len(options.Dep.MainAliases) > 0 {
-			config.toolsArgs = append(config.toolsArgs, "-M"+options.Dep.MainAliases)
+		if len(options.Clj.MainAliases) > 0 {
+			config.toolsArgs = append(config.toolsArgs, "-M"+options.Clj.MainAliases)
 		}
-		if len(options.Dep.AllAliases) > 0 {
-			config.toolsArgs = append(config.toolsArgs, "-A"+options.Dep.AllAliases)
+		if len(options.Clj.ToolAliases) > 0 {
+			config.toolsArgs = append(config.toolsArgs, "-T"+options.Clj.ToolAliases)
 		}
-		if len(options.Dep.ForceCP) > 0 {
+		if len(options.Clj.AllAliases) > 0 {
+			config.toolsArgs = append(config.toolsArgs, "-A"+options.Clj.AllAliases)
+		}
+		if len(options.Clj.ForceCP) > 0 {
 			config.toolsArgs = append(config.toolsArgs, "--skip-cp")
 		}
-		if options.Dep.Threads > 0 {
+		if options.Clj.Threads > 0 {
 			config.toolsArgs = append(config.toolsArgs, "--threads")
-			config.toolsArgs = append(config.toolsArgs, strconv.Itoa(options.Dep.Threads))
+			config.toolsArgs = append(config.toolsArgs, strconv.Itoa(options.Clj.Threads))
 		}
-		if options.Dep.Trace {
+		if options.Clj.Trace {
 			config.toolsArgs = append(config.toolsArgs, "--trace")
 		}
 	}
@@ -518,10 +547,10 @@ func buildToolsArgs(config *t4cConfig, stale bool, options *allOpts) {
 
 func activeClassPath(options *allOpts, config t4cConfig) (string, error) {
 	var cp string
-	if options.Dep.Describe {
+	if options.Clj.Describe {
 		cp = ""
-	} else if len(options.Dep.ForceCP) > 0 {
-		cp = options.Dep.ForceCP
+	} else if len(options.Clj.ForceCP) > 0 {
+		cp = options.Clj.ForceCP
 	} else {
 		b, err := ioutil.ReadFile(config.cpFile)
 		if err != nil {
@@ -540,13 +569,14 @@ func argsDescription(pathVector string, toolsDir string, configDir string, cache
  :install-dir "` + toolsDir + `"
  :config-dir "` + configDir + `"
  :cache-dir "` + cacheDir + `"
- :force ` + strconv.FormatBool(options.Dep.Force) + `
- :repro ` + strconv.FormatBool(options.Dep.Repro) + `
- :resolve-aliases "` + options.Dep.ResolveAliases + `"
- :classpath-aliases "` + options.Dep.ClassPathAliases + `"
- :jvm-aliases "` + options.Dep.JvmAliases + `"
- :main-aliases "` + options.Dep.MainAliases + `"
- :all-aliases "` + options.Dep.AllAliases + `"}`
+ :force ` + strconv.FormatBool(options.Clj.Force) + `
+ :repro ` + strconv.FormatBool(options.Clj.Repro) + `
+ :resolve-aliases "` + options.Clj.ResolveAliases + `"
+ :classpath-aliases "` + options.Clj.ClassPathAliases + `"
+ :jvm-aliases "` + options.Clj.JvmAliases + `"
+ :main-aliases "` + options.Clj.MainAliases + `"
+ :tool-aliases "` + options.Clj.ToolAliases + `"
+ :all-aliases "` + options.Clj.AllAliases + `"}`
 }
 
 func getInitArgs(options *allOpts) []string {

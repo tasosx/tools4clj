@@ -32,7 +32,7 @@ var testT4CNativeArgsItems = []TestReadItem{
 	{ // clojure, NativeArgs not set
 		[]string{"clojure"},
 		allOpts{
-			Dep:        depOpts{},
+			Clj:        cljOpts{},
 			Init:       initOpts{},
 			Main:       mainOpts{},
 			Args:       []string{},
@@ -44,7 +44,7 @@ var testT4CNativeArgsItems = []TestReadItem{
 	{ // clojure, NativeArgs set
 		[]string{"clojure", "--native-args"},
 		allOpts{
-			Dep:        depOpts{},
+			Clj:        cljOpts{},
 			Init:       initOpts{},
 			Main:       mainOpts{},
 			Args:       []string{},
@@ -59,7 +59,7 @@ var testT4CRlwrapItems = []TestReadItem{
 	{ // clj, Rlwrap
 		[]string{"clj"},
 		allOpts{
-			Dep:        depOpts{},
+			Clj:        cljOpts{},
 			Init:       initOpts{},
 			Main:       mainOpts{},
 			Args:       []string{},
@@ -71,7 +71,7 @@ var testT4CRlwrapItems = []TestReadItem{
 	{ // clj, rebel-readline
 		[]string{"clj", "--rebel"},
 		allOpts{
-			Dep: depOpts{
+			Clj: cljOpts{
 				DepsData: rebelSdepsArg,
 			},
 			Init: initOpts{},
@@ -87,7 +87,7 @@ var testT4CRlwrapItems = []TestReadItem{
 	{ // clj, rebel-readline defined twice
 		[]string{"clj", "--rebel", "--rebel"},
 		allOpts{
-			Dep: depOpts{
+			Clj: cljOpts{
 				DepsData: rebelSdepsArg,
 			},
 			Init: initOpts{},
@@ -103,7 +103,7 @@ var testT4CRlwrapItems = []TestReadItem{
 	{ // clojure, can not use rebel-readline
 		[]string{"clojure", "--rebel"},
 		allOpts{
-			Dep: depOpts{
+			Clj: cljOpts{
 				DepsData: rebelSdepsArg,
 			},
 			Init: initOpts{},
@@ -121,7 +121,8 @@ var testT4CRlwrapItems = []TestReadItem{
 var testMainItems = []TestReadItem{
 	{ // abnormal totally missing args
 		[]string{},
-		allOpts{Dep: depOpts{},
+		allOpts{
+			Clj:        cljOpts{},
 			Init:       initOpts{},
 			Main:       mainOpts{},
 			Args:       []string{},
@@ -131,7 +132,8 @@ var testMainItems = []TestReadItem{
 	},
 	{ // no args
 		[]string{"clojure"},
-		allOpts{Dep: depOpts{},
+		allOpts{
+			Clj:        cljOpts{},
 			Init:       initOpts{},
 			Main:       mainOpts{},
 			Args:       []string{},
@@ -142,7 +144,8 @@ var testMainItems = []TestReadItem{
 	},
 	{ // help arg, long
 		[]string{"clojure", "--help"},
-		allOpts{Dep: depOpts{},
+		allOpts{
+			Clj:  cljOpts{},
 			Init: initOpts{},
 			Main: mainOpts{
 				Help:    true,
@@ -156,7 +159,8 @@ var testMainItems = []TestReadItem{
 	},
 	{ // help arg, short -h
 		[]string{"clojure", "-h"},
-		allOpts{Dep: depOpts{},
+		allOpts{
+			Clj:  cljOpts{},
 			Init: initOpts{},
 			Main: mainOpts{
 				Help:    true,
@@ -170,7 +174,8 @@ var testMainItems = []TestReadItem{
 	},
 	{ // help arg, short -?
 		[]string{"clojure", "-?"},
-		allOpts{Dep: depOpts{},
+		allOpts{
+			Clj:  cljOpts{},
 			Init: initOpts{},
 			Main: mainOpts{
 				Help:    true,
@@ -186,7 +191,8 @@ var testMainItems = []TestReadItem{
 		[]string{"clojure",
 			"-m",
 		},
-		allOpts{Dep: depOpts{},
+		allOpts{
+			Clj:        cljOpts{},
 			Init:       initOpts{},
 			Main:       mainOpts{},
 			Args:       []string{},
@@ -199,7 +205,8 @@ var testMainItems = []TestReadItem{
 		[]string{"clojure",
 			"-m", "namespace_name",
 		},
-		allOpts{Dep: depOpts{},
+		allOpts{
+			Clj:  cljOpts{},
 			Init: initOpts{},
 			Main: mainOpts{
 				MainArgs: []string{"-m", "namespace_name"},
@@ -214,7 +221,8 @@ var testMainItems = []TestReadItem{
 		[]string{"clojure",
 			"--main", "namespace_name",
 		},
-		allOpts{Dep: depOpts{},
+		allOpts{
+			Clj:  cljOpts{},
 			Init: initOpts{},
 			Main: mainOpts{
 				MainArgs: []string{"-m", "namespace_name"},
@@ -227,7 +235,8 @@ var testMainItems = []TestReadItem{
 	},
 	{ // repl arg, short -r
 		[]string{"clojure", "-r"},
-		allOpts{Dep: depOpts{},
+		allOpts{
+			Clj:  cljOpts{},
 			Init: initOpts{},
 			Main: mainOpts{
 				Repl: true,
@@ -240,7 +249,8 @@ var testMainItems = []TestReadItem{
 	},
 	{ // repl arg, long --repl
 		[]string{"clojure", "--repl"},
-		allOpts{Dep: depOpts{},
+		allOpts{
+			Clj:  cljOpts{},
 			Init: initOpts{},
 			Main: mainOpts{
 				Repl: true,
@@ -255,7 +265,8 @@ var testMainItems = []TestReadItem{
 		[]string{"clojure",
 			"this_is_a_path",
 		},
-		allOpts{Dep: depOpts{},
+		allOpts{
+			Clj:        cljOpts{},
 			Init:       initOpts{},
 			Main:       mainOpts{},
 			Args:       []string{"this_is_a_path"},
@@ -268,7 +279,8 @@ var testMainItems = []TestReadItem{
 		[]string{"clojure",
 			"-",
 		},
-		allOpts{Dep: depOpts{},
+		allOpts{
+			Clj:        cljOpts{},
 			Init:       initOpts{},
 			Main:       mainOpts{},
 			Args:       []string{"-"},
@@ -282,7 +294,8 @@ var testMainItems = []TestReadItem{
 			"this_is_a_path",
 			"--extra1", "-e2",
 		},
-		allOpts{Dep: depOpts{},
+		allOpts{
+			Clj:        cljOpts{},
 			Init:       initOpts{},
 			Main:       mainOpts{},
 			Args:       []string{"this_is_a_path", "--extra1", "-e2"},
@@ -296,7 +309,8 @@ var testMainItems = []TestReadItem{
 var testDepItems = []TestReadItem{
 	{ // not valid Dep -S option
 		[]string{"clojure", "-S"},
-		allOpts{Dep: depOpts{},
+		allOpts{
+			Clj:        cljOpts{},
 			Init:       initOpts{},
 			Main:       mainOpts{},
 			Args:       []string{},
@@ -307,7 +321,8 @@ var testDepItems = []TestReadItem{
 	},
 	{ // not valid Dep -S option
 		[]string{"clojure", "-Sany"},
-		allOpts{Dep: depOpts{},
+		allOpts{
+			Clj:        cljOpts{},
 			Init:       initOpts{},
 			Main:       mainOpts{},
 			Args:       []string{},
@@ -323,7 +338,11 @@ var testDepItems = []TestReadItem{
 			"-R:argR",
 			"-C:argC",
 			"-M:argM",
+			"-T:argT",
 			"-A:argA",
+			"-X:argX",
+			`argX/K`,
+			`argX/V`,
 			"-Sdeps",
 			`{:deps {clansi {:mvn/version "1.0.0"}}}`,
 			"-Spath",
@@ -341,13 +360,15 @@ var testDepItems = []TestReadItem{
 			"-Strace",
 		},
 		allOpts{
-			Dep: depOpts{
+			Clj: cljOpts{
 				JvmOpts:          []string{"argJ"},
 				JvmAliases:       ":argO",
 				ResolveAliases:   ":argR",
 				ClassPathAliases: ":argC",
 				MainAliases:      ":argM",
+				ToolAliases:      ":argT",
 				AllAliases:       ":argA",
+				ExecAlias:        []string{":argX", "argX/K", "argX/V"},
 				DepsData:         `{:deps {clansi {:mvn/version "1.0.0"}}}`,
 				PrintClassPath:   true,
 				ForceCP:          `src:target:/classpath`,
@@ -376,15 +397,17 @@ var testDepItems = []TestReadItem{
 			"-R:argR1", "-R:argR2",
 			"-C:argC1", "-C:argC2",
 			"-M:argM1", "-M:argM2",
+			"-T:argT1", "-T:argT2",
 			"-A:argA1", "-A:argA2",
 		},
 		allOpts{
-			Dep: depOpts{
+			Clj: cljOpts{
 				JvmOpts:          []string{"argJ1", "argJ2"},
 				JvmAliases:       ":argO1:argO2",
 				ResolveAliases:   ":argR1:argR2",
 				ClassPathAliases: ":argC1:argC2",
 				MainAliases:      ":argM1:argM2",
+				ToolAliases:      ":argT1:argT2",
 				AllAliases:       ":argA1:argA2",
 			},
 			Init:       initOpts{},
@@ -403,7 +426,7 @@ var testDepItems = []TestReadItem{
 			`{:deps {clansi {:mvn/version "1.0.1"}}}`,
 		},
 		allOpts{
-			Dep:        depOpts{},
+			Clj:        cljOpts{},
 			Init:       initOpts{},
 			Main:       mainOpts{},
 			Args:       []string{},
@@ -420,7 +443,7 @@ var testDepItems = []TestReadItem{
 			`src:target:/classpath2`,
 		},
 		allOpts{
-			Dep:        depOpts{},
+			Clj:        cljOpts{},
 			Init:       initOpts{},
 			Main:       mainOpts{},
 			Args:       []string{},
@@ -437,7 +460,7 @@ var testDepItems = []TestReadItem{
 			`5`,
 		},
 		allOpts{
-			Dep:        depOpts{},
+			Clj:        cljOpts{},
 			Init:       initOpts{},
 			Main:       mainOpts{},
 			Args:       []string{},
@@ -451,7 +474,7 @@ var testDepItems = []TestReadItem{
 			"-Sdeps",
 		},
 		allOpts{
-			Dep:        depOpts{},
+			Clj:        cljOpts{},
 			Init:       initOpts{},
 			Main:       mainOpts{},
 			Args:       []string{},
@@ -465,7 +488,7 @@ var testDepItems = []TestReadItem{
 			"-Scp",
 		},
 		allOpts{
-			Dep:        depOpts{},
+			Clj:        cljOpts{},
 			Init:       initOpts{},
 			Main:       mainOpts{},
 			Args:       []string{},
@@ -479,7 +502,7 @@ var testDepItems = []TestReadItem{
 			"-Sthreads",
 		},
 		allOpts{
-			Dep:        depOpts{},
+			Clj:        cljOpts{},
 			Init:       initOpts{},
 			Main:       mainOpts{},
 			Args:       []string{},
@@ -494,7 +517,7 @@ var testDepItems = []TestReadItem{
 			"not-a-number",
 		},
 		allOpts{
-			Dep:        depOpts{},
+			Clj:        cljOpts{},
 			Init:       initOpts{},
 			Main:       mainOpts{},
 			Args:       []string{},
@@ -510,7 +533,7 @@ var testDepItems = []TestReadItem{
 			"-A:argA2",
 		},
 		allOpts{
-			Dep: depOpts{
+			Clj: cljOpts{
 				AllAliases: ":argA1",
 			},
 			Init:       initOpts{},
@@ -527,7 +550,7 @@ var testDepItems = []TestReadItem{
 			"-h",
 		},
 		allOpts{
-			Dep: depOpts{
+			Clj: cljOpts{
 				MainAliases: ":argM",
 			},
 			Init: initOpts{},
@@ -541,7 +564,27 @@ var testDepItems = []TestReadItem{
 			NativeArgs: true,
 			Rlwrap:     false,
 		},
-		"classpath value (CP) not defined for -Scp option",
+		"",
+	},
+	{ // dep tool alliases along with help option
+		[]string{"clojure",
+			"-T:argT",
+			"-h",
+		},
+		allOpts{
+			Clj: cljOpts{
+				ToolAliases: ":argT",
+			},
+			Init: initOpts{},
+			Main: mainOpts{
+				Help:    true,
+				HelpArg: "-h",
+			},
+			Args:       []string{},
+			NativeArgs: true,
+			Rlwrap:     false,
+		},
+		"",
 	},
 	{ // dep all alliases along with help option
 		[]string{"clojure",
@@ -549,7 +592,7 @@ var testDepItems = []TestReadItem{
 			"--help",
 		},
 		allOpts{
-			Dep: depOpts{
+			Clj: cljOpts{
 				AllAliases: ":argA",
 			},
 			Init: initOpts{},
@@ -563,7 +606,61 @@ var testDepItems = []TestReadItem{
 			NativeArgs: true,
 			Rlwrap:     false,
 		},
-		"classpath value (CP) not defined for -Scp option",
+		"",
+	},
+	{ // clojure exec
+		[]string{"clojure",
+			"-X:foo",
+		},
+		allOpts{
+			Clj: cljOpts{
+				ExecAlias: []string{":foo"},
+			},
+			Init:       initOpts{},
+			Main:       mainOpts{},
+			Args:       []string{},
+			NativeArgs: true,
+			Rlwrap:     false,
+		},
+		"",
+	},
+	{ // clojure exec, with kv overrides
+		[]string{"clojure",
+			"-X:foo",
+			"[:y :z]",
+			"1",
+		},
+		allOpts{
+			Clj: cljOpts{
+				ExecAlias: []string{":foo", "[:y :z]", "1"},
+			},
+			Init:       initOpts{},
+			Main:       mainOpts{},
+			Args:       []string{},
+			NativeArgs: true,
+			Rlwrap:     false,
+		},
+		"",
+	},
+	{ // clojure exec, with kv overrides, and jvm options
+		[]string{"clojure",
+			"-X:foo",
+			"[:y :z]",
+			"1",
+			"-JargJ1", "-JargJ2",
+		},
+		allOpts{
+			Clj: cljOpts{
+				JvmOpts:   []string{"argJ1", "argJ2"},
+				ExecAlias: []string{":foo", "[:y :z]", "1"},
+			},
+			Init:       initOpts{},
+			Main:       mainOpts{},
+			Args:       []string{},
+			NativeArgs: true,
+			Rlwrap:     false,
+		},
+		"",
 	},
 }
 
@@ -573,7 +670,7 @@ var testInitItems = []TestReadItem{
 			"-i",
 		},
 		allOpts{
-			Dep:        depOpts{},
+			Clj:        cljOpts{},
 			Init:       initOpts{},
 			Main:       mainOpts{},
 			Args:       []string{},
@@ -587,7 +684,7 @@ var testInitItems = []TestReadItem{
 			"-i", "init_path_file",
 		},
 		allOpts{
-			Dep: depOpts{},
+			Clj: cljOpts{},
 			Init: initOpts{
 				Init: "init_path_file",
 			},
@@ -603,7 +700,7 @@ var testInitItems = []TestReadItem{
 			"--init", "init_path_file",
 		},
 		allOpts{
-			Dep: depOpts{},
+			Clj: cljOpts{},
 			Init: initOpts{
 				Init: "init_path_file",
 			},
@@ -620,7 +717,7 @@ var testInitItems = []TestReadItem{
 			"--init", "other_init_path_file",
 		},
 		allOpts{
-			Dep: depOpts{},
+			Clj: cljOpts{},
 			Init: initOpts{
 				Init: "init_path_file",
 			},
@@ -636,7 +733,7 @@ var testInitItems = []TestReadItem{
 			"-e",
 		},
 		allOpts{
-			Dep:        depOpts{},
+			Clj:        cljOpts{},
 			Init:       initOpts{},
 			Main:       mainOpts{},
 			Args:       []string{},
@@ -650,7 +747,7 @@ var testInitItems = []TestReadItem{
 			"-e", "eval_string",
 		},
 		allOpts{
-			Dep: depOpts{},
+			Clj: cljOpts{},
 			Init: initOpts{
 				Eval: "eval_string",
 			},
@@ -666,7 +763,7 @@ var testInitItems = []TestReadItem{
 			"--eval", "eval_string",
 		},
 		allOpts{
-			Dep: depOpts{},
+			Clj: cljOpts{},
 			Init: initOpts{
 				Eval: "eval_string",
 			},
@@ -683,7 +780,7 @@ var testInitItems = []TestReadItem{
 			"--eval", "other_eval_string",
 		},
 		allOpts{
-			Dep: depOpts{},
+			Clj: cljOpts{},
 			Init: initOpts{
 				Eval: "eval_string",
 			},
@@ -699,7 +796,7 @@ var testInitItems = []TestReadItem{
 			"--report",
 		},
 		allOpts{
-			Dep:        depOpts{},
+			Clj:        cljOpts{},
 			Init:       initOpts{},
 			Main:       mainOpts{},
 			Args:       []string{},
@@ -713,7 +810,7 @@ var testInitItems = []TestReadItem{
 			"--report", "",
 		},
 		allOpts{
-			Dep:        depOpts{},
+			Clj:        cljOpts{},
 			Init:       initOpts{},
 			Main:       mainOpts{},
 			Args:       []string{},
@@ -727,7 +824,7 @@ var testInitItems = []TestReadItem{
 			"--report", "test-filename.txt",
 		},
 		allOpts{
-			Dep: depOpts{},
+			Clj: cljOpts{},
 			Init: initOpts{
 				Report: "test-filename.txt",
 			},
@@ -743,7 +840,7 @@ var testInitItems = []TestReadItem{
 			"--report", "stderr",
 		},
 		allOpts{
-			Dep: depOpts{},
+			Clj: cljOpts{},
 			Init: initOpts{
 				Report: "stderr",
 			},
@@ -759,7 +856,7 @@ var testInitItems = []TestReadItem{
 			"--report", "none",
 		},
 		allOpts{
-			Dep: depOpts{},
+			Clj: cljOpts{},
 			Init: initOpts{
 				Report: "none",
 			},
@@ -776,7 +873,7 @@ var testInitItems = []TestReadItem{
 			"--report", "none",
 		},
 		allOpts{
-			Dep: depOpts{},
+			Clj: cljOpts{},
 			Init: initOpts{
 				Report: "stderr",
 			},
@@ -822,7 +919,7 @@ func TestRead(t *testing.T) {
 			readOpts := fmt.Sprintf("%+v", opts)
 			expectedOpts := fmt.Sprintf("%+v", v.expected)
 			if readOpts != expectedOpts {
-				t.Errorf("read options failed, expected %v, got %v", expectedOpts, readOpts)
+				t.Errorf("read options failed, \nexpected\n%v, \ngot \n%v", expectedOpts, readOpts)
 			}
 		}
 	}
@@ -831,7 +928,7 @@ func TestRead(t *testing.T) {
 func TestChecksumOf(t *testing.T) {
 	// input
 	options := allOpts{
-		Dep: depOpts{
+		Clj: cljOpts{
 			ResolveAliases:   ":argR",
 			ClassPathAliases: ":argC",
 			AllAliases:       ":argA",
@@ -846,7 +943,7 @@ func TestChecksumOf(t *testing.T) {
 		"filepath2.edn",
 	}
 	// output
-	expected := "456246304"
+	expected := "4009079771"
 
 	res := checksumOf(&options, configPaths)
 	if res != expected {
@@ -864,7 +961,7 @@ func TestChecksumOf(t *testing.T) {
 	}
 
 	// different output is expected
-	expected = "4122476052"
+	expected = "1098087381"
 
 	res = checksumOf(&options, configPaths)
 	if res != expected {
@@ -915,8 +1012,8 @@ func TestIsStale(t *testing.T) {
 
 	// forced cp
 	// inputs
-	options.Dep.Force = true
-	options.Dep.Trace = false
+	options.Clj.Force = true
+	options.Clj.Trace = false
 	config.cpFile = cpFile
 	configPaths = []string{newerFile}
 	// output
@@ -933,8 +1030,8 @@ func TestIsStale(t *testing.T) {
 
 	// trace
 	// inputs
-	options.Dep.Force = false
-	options.Dep.Trace = true
+	options.Clj.Force = false
+	options.Clj.Trace = true
 	config.cpFile = cpFile
 	configPaths = []string{newerFile}
 	// output
@@ -951,8 +1048,8 @@ func TestIsStale(t *testing.T) {
 
 	// not existing cpFile
 	// inputs
-	options.Dep.Force = false
-	options.Dep.Trace = false
+	options.Clj.Force = false
+	options.Clj.Trace = false
 	config.cpFile = "notexisting_cpFile.edn"
 	configPaths = []string{newerFile}
 	// output
@@ -969,8 +1066,8 @@ func TestIsStale(t *testing.T) {
 
 	// existing cpFile, not existing config paths file
 	// inputs
-	options.Dep.Force = false
-	options.Dep.Trace = false
+	options.Clj.Force = false
+	options.Clj.Trace = false
 	config.cpFile = cpFile
 	configPaths = []string{"notexisting_file.edn"}
 	// output
@@ -987,8 +1084,8 @@ func TestIsStale(t *testing.T) {
 
 	// existing cpFile, existing older config paths file
 	// inputs
-	options.Dep.Force = false
-	options.Dep.Trace = false
+	options.Clj.Force = false
+	options.Clj.Trace = false
 	config.cpFile = cpFile
 	configPaths = []string{olderFile}
 	// output
@@ -1005,8 +1102,8 @@ func TestIsStale(t *testing.T) {
 
 	// existing cpFile, existing newer config paths file
 	// inputs
-	options.Dep.Force = false
-	options.Dep.Trace = false
+	options.Clj.Force = false
+	options.Clj.Trace = false
 	config.cpFile = cpFile
 	configPaths = []string{newerFile}
 	// output
@@ -1023,8 +1120,8 @@ func TestIsStale(t *testing.T) {
 
 	// existing cpFile, existing at least one newer config paths file
 	// inputs
-	options.Dep.Force = false
-	options.Dep.Trace = false
+	options.Clj.Force = false
+	options.Clj.Trace = false
 	config.cpFile = cpFile
 	configPaths = []string{olderFile, newerFile}
 	// output
@@ -1042,12 +1139,13 @@ func TestIsStale(t *testing.T) {
 
 func TestBuildToolsArgs(t *testing.T) {
 	options := allOpts{
-		Dep: depOpts{
+		Clj: cljOpts{
 			DepsData:         `{:deps {clansi {:mvn/version "1.0.0"}}}`,
 			ResolveAliases:   ":argR",
 			ClassPathAliases: ":argC",
 			JvmAliases:       ":argJ",
 			MainAliases:      ":argM",
+			ToolAliases:      ":argT",
 			AllAliases:       ":argA",
 			ForceCP:          "forced-class-path",
 			Pom:              false,
@@ -1059,7 +1157,7 @@ func TestBuildToolsArgs(t *testing.T) {
 	stale := false
 
 	// toolsArgs not changed when: Dep.Pom == false, stale == false
-	options.Dep.Pom = false
+	options.Clj.Pom = false
 	config.toolsArgs = []string{"not_changed"}
 	stale = false
 	expected := []string{"not_changed"}
@@ -1072,7 +1170,7 @@ func TestBuildToolsArgs(t *testing.T) {
 	}
 
 	// toolsArgs changed when: Dep.Pom == true, stale == false
-	options.Dep.Pom = true
+	options.Clj.Pom = true
 	config.toolsArgs = []string{"not_changed"}
 	stale = false
 	expected = []string{
@@ -1082,6 +1180,7 @@ func TestBuildToolsArgs(t *testing.T) {
 		"-C:argC",
 		"-J:argJ",
 		"-M:argM",
+		"-T:argT",
 		"-A:argA",
 		"--skip-cp",
 		"--threads",
@@ -1097,7 +1196,7 @@ func TestBuildToolsArgs(t *testing.T) {
 	}
 
 	// toolsArgs changed when: Dep.Pom == false, stale == true
-	options.Dep.Pom = false
+	options.Clj.Pom = false
 	config.toolsArgs = []string{"not_changed"}
 	stale = true
 	expected = []string{
@@ -1107,6 +1206,7 @@ func TestBuildToolsArgs(t *testing.T) {
 		"-C:argC",
 		"-J:argJ",
 		"-M:argM",
+		"-T:argT",
 		"-A:argA",
 		"--skip-cp",
 		"--threads",
@@ -1164,8 +1264,8 @@ func TestActiveClassPath(t *testing.T) {
 	}
 
 	// Dep.Describe == true, existing class path file
-	options.Dep.Describe = true
-	options.Dep.ForceCP = "forced_cp"
+	options.Clj.Describe = true
+	options.Clj.ForceCP = "forced_cp"
 	config.cpFile = cpFile
 	expected = ""
 
@@ -1178,8 +1278,8 @@ func TestActiveClassPath(t *testing.T) {
 	}
 
 	// Dep.ForceCP == false and Dep.ForceCP is set, existing class path file
-	options.Dep.Describe = false
-	options.Dep.ForceCP = "forced_cp"
+	options.Clj.Describe = false
+	options.Clj.ForceCP = "forced_cp"
 	config.cpFile = cpFile
 	expected = "forced_cp"
 
@@ -1203,13 +1303,14 @@ func TestArgsDescription(t *testing.T) {
 		configProject: "testConfigProject",
 	}
 	options := allOpts{
-		Dep: depOpts{
+		Clj: cljOpts{
 			Force:            true,
 			Repro:            true,
 			ResolveAliases:   ":argR",
 			ClassPathAliases: ":argC",
 			JvmAliases:       ":argJ",
 			MainAliases:      ":argM",
+			ToolAliases:      ":argT",
 			AllAliases:       ":argA",
 		},
 	}
@@ -1221,17 +1322,18 @@ func TestArgsDescription(t *testing.T) {
  :install-dir "` + toolsDir + `"
  :config-dir "` + configDir + `"
  :cache-dir "` + cacheDir + `"
- :force ` + strconv.FormatBool(options.Dep.Force) + `
- :repro ` + strconv.FormatBool(options.Dep.Repro) + `
- :resolve-aliases "` + options.Dep.ResolveAliases + `"
- :classpath-aliases "` + options.Dep.ClassPathAliases + `"
- :jvm-aliases "` + options.Dep.JvmAliases + `"
- :main-aliases "` + options.Dep.MainAliases + `"
- :all-aliases "` + options.Dep.AllAliases + `"}`
+ :force ` + strconv.FormatBool(options.Clj.Force) + `
+ :repro ` + strconv.FormatBool(options.Clj.Repro) + `
+ :resolve-aliases "` + options.Clj.ResolveAliases + `"
+ :classpath-aliases "` + options.Clj.ClassPathAliases + `"
+ :jvm-aliases "` + options.Clj.JvmAliases + `"
+ :main-aliases "` + options.Clj.MainAliases + `"
+ :tool-aliases "` + options.Clj.ToolAliases + `"
+ :all-aliases "` + options.Clj.AllAliases + `"}`
 
 	res := argsDescription(pathVector, toolsDir, configDir, cacheDir, &config, &options)
 	if res != expected {
-		t.Errorf("argsDescription failed, expected %v, got %v", expected, res)
+		t.Errorf("argsDescription failed, \nexpected\n%v, \ngot \n%v", expected, res)
 	}
 }
 

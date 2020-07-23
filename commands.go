@@ -36,6 +36,7 @@ func makeClassPathCmd(conf *t4cConfig, toolsClassPath string) exec.Cmd {
 		"--config-user", conf.configUser,
 		"--config-project", conf.configProject,
 		"--libs-file", conf.libsFile,
+		"--basis-file", conf.basisFile,
 		"--cp-file", conf.cpFile,
 		"--jvm-file", conf.jvmFile,
 		"--main-file", conf.mainFile)
@@ -73,12 +74,33 @@ func printTreeCmd(conf *t4cConfig, toolsClassPath string) exec.Cmd {
 	return *cmd
 }
 
-func clojureCmd(jvmCacheOpts []string, jvmOpts []string, libsFile string, cp string,
-	mainCacheOpts []string, clojureArgs []string, rlwrap bool) exec.Cmd {
+func clojureExecuteCmd(jvmCacheOpts []string, jvmOpts []string, basisFile string,
+	cp string, execAlias []string) exec.Cmd {
 
 	cmdArgs := append([]string{}, jvmCacheOpts...)
 	cmdArgs = append(cmdArgs, jvmOpts...)
-	cmdArgs = append(cmdArgs, "-Dclojure.libfile="+libsFile, "-classpath", cp, "clojure.main")
+	cmdArgs = append(cmdArgs, "-Dclojure.basisfile="+basisFile, "-classpath", cp, "clojure.main")
+	cmdArgs = append(cmdArgs, "-m", "clojure.tools.deps.alpha.exec")
+	if len(execAlias) > 0 {
+		cmdArgs = append(cmdArgs, "-X"+execAlias[0])
+	}
+	if len(execAlias) > 1 {
+		cmdArgs = append(cmdArgs, execAlias[1:]...)
+	}
+
+	var cmd = exec.Command(javaPath, cmdArgs...)
+
+	cmd.Args = removeEmpty(cmd.Args)
+
+	return *cmd
+}
+
+func clojureCmd(jvmCacheOpts []string, jvmOpts []string, libsFile string, basisFile string,
+	cp string, mainCacheOpts []string, clojureArgs []string, rlwrap bool) exec.Cmd {
+
+	cmdArgs := append([]string{}, jvmCacheOpts...)
+	cmdArgs = append(cmdArgs, jvmOpts...)
+	cmdArgs = append(cmdArgs, "-Dclojure.libfile="+libsFile, "-Dclojure.basisfile="+basisFile, "-classpath", cp, "clojure.main")
 	cmdArgs = append(cmdArgs, mainCacheOpts...)
 	cmdArgs = append(cmdArgs, clojureArgs...)
 

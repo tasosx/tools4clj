@@ -70,7 +70,7 @@ func runClojure(osArgs []string, cljRun bool) {
 	// use command line options
 	err = use(&opts)
 	if err != nil {
-		if opts.Dep.Verbose {
+		if opts.Clj.Verbose {
 			fmt.Println(err)
 		}
 		os.Exit(1)

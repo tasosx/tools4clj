@@ -74,6 +74,7 @@ func TestMakeClassPathCmd(t *testing.T) {
 			"--config-user", conf.configUser,
 			"--config-project", conf.configProject,
 			"--libs-file", conf.libsFile,
+			"--basis-file", conf.basisFile,
 			"--cp-file", conf.cpFile,
 			"--jvm-file", conf.jvmFile,
 			"--main-file", conf.mainFile,
@@ -168,6 +169,54 @@ func TestPrintTreeCmd(t *testing.T) {
 	}
 }
 
+func TestClojureExecuteCmd(t *testing.T) {
+	jvmCacheOpts := []string{
+		"-jvmCacheOpts",
+		"test",
+	}
+	jvmOpts := []string{
+		"-jvmOpts",
+		"test",
+	}
+	conf := t4cConfig{
+		basisFile: "test-basis-file",
+	}
+	cp := "test-class-path"
+	execAlias := []string{":foo", "[:y :z]", "1"}
+
+	cmd := clojureExecuteCmd(jvmCacheOpts, jvmOpts, conf.basisFile,
+		cp, execAlias)
+
+	expected := []string{}
+
+	// test clojure execute args
+	{
+		expected = []string{javaPath}
+		expected = append(expected, jvmCacheOpts...)
+		expected = append(expected, jvmOpts...)
+		expected = append(expected, "-Dclojure.basisfile="+conf.basisFile, "-classpath", cp, "clojure.main")
+		expected = append(expected, "-m", "clojure.tools.deps.alpha.exec")
+		if len(execAlias) > 0 {
+			expected = append(expected, "-X"+execAlias[0])
+		}
+		if len(execAlias) > 1 {
+			expected = append(expected, execAlias[1:]...)
+		}
+		expected = removeEmpty(expected)
+
+		if len(cmd.Args) != len(expected) {
+			t.Errorf("clojureExecuteCmd failed, args expected %v, got %v", len(expected), len(cmd.Args))
+			t.FailNow()
+		}
+
+		for i, v := range cmd.Args {
+			if v != expected[i] {
+				t.Errorf("clojureExecuteCmd failed, arg expected %v, got %v", expected[i], v)
+			}
+		}
+	}
+}
+
 func TestClojureCmd(t *testing.T) {
 	jvmCacheOpts := []string{
 		"-jvmCacheOpts",
@@ -190,8 +239,8 @@ func TestClojureCmd(t *testing.T) {
 		"test",
 	}
 
-	cmd := clojureCmd(jvmCacheOpts, jvmOpts, conf.libsFile, cp,
-		mainCacheOpts, clojureArgs, false)
+	cmd := clojureCmd(jvmCacheOpts, jvmOpts, conf.libsFile, conf.basisFile,
+		cp, mainCacheOpts, clojureArgs, false)
 
 	expected := []string{}
 
@@ -200,7 +249,7 @@ func TestClojureCmd(t *testing.T) {
 		expected = []string{javaPath}
 		expected = append(expected, jvmCacheOpts...)
 		expected = append(expected, jvmOpts...)
-		expected = append(expected, "-Dclojure.libfile="+conf.libsFile, "-classpath", cp, "clojure.main")
+		expected = append(expected, "-Dclojure.libfile="+conf.libsFile, "-Dclojure.basisfile="+conf.basisFile, "-classpath", cp, "clojure.main")
 		expected = append(expected, mainCacheOpts...)
 		expected = append(expected, clojureArgs...)
 		expected = removeEmpty(expected)
@@ -217,8 +266,8 @@ func TestClojureCmd(t *testing.T) {
 		}
 	}
 
-	cmd = clojureCmd(jvmCacheOpts, jvmOpts, conf.libsFile, cp,
-		mainCacheOpts, clojureArgs, true)
+	cmd = clojureCmd(jvmCacheOpts, jvmOpts, conf.libsFile, conf.basisFile,
+		cp, mainCacheOpts, clojureArgs, true)
 
 	// test clj (rlwrap'ed) args
 	{

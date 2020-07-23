@@ -4,7 +4,7 @@
 In the shadows of the official clojure tools:
 
 ```
-const version = "1.10.1.561"
+const version = "1.10.1.590"
 ```
 
 
@@ -30,17 +30,18 @@ Any requests/PRs for features are welcome, as long as they do not stray from the
 
 ## Why this?
 
-### Is there something different compared to official deps cli tools?
+### Is there something different compared to official clojure/clj tools?
 
 - An easy entrance to clojure world for go users. If you are a go user you are one command line away from clojured happiness.
 - Resolve Windows quoting differences. No need to think quotes-translation-for-Windows. One clojure/clj tools command to run anywhere. So pick a published deps cli example on the internet and run it directly on Windows (99% of the deps-cli clojure examples are directed to POSIX users anyways).
 - A pretty clojure repl. Use rebel when you want to view/display a prettier clojure dev UI.
+- Same and simple update procedure to all supported platforms.
 
 ### Is it only for Windows?
 
 TL;DR. No, it is for any platform, but on Windows has some specific features.
 
-For the Windows platform a decision was made, in order to mitigate the quote escaping mess (see: https://clojure.atlassian.net/browse/TDEPS-133, https://clojure.atlassian.net/browse/TDEPS-136), to prefer a unix oriented command line input, by accepting arguments enclosed in single or double quotes, like `'(print "test")'` or `"(print \"test\")"`. Windows double-quotes nesting is not supported. Unix single quotes nesting is not supported.
+For the Windows platform a decision was made, in order to mitigate the quote escaping mess (see: https://clojure.atlassian.net/browse/TDEPS-133, https://clojure.atlassian.net/browse/TDEPS-136), to prefer a unix oriented command line input, by accepting arguments enclosed in single or double quotes, like `'(print "test")'` or `"(print \"test\")"`. Windows double-quotes nesting or Unix single quotes nesting is not supported on Windows platform.
 
 If you need to override this behaviour, and want to use the native Windows arguments parsing, use `--native-args` option. It is the default on all other platforms.
 
@@ -63,7 +64,7 @@ To install (or update) the `clojure` and `clj` binary launchers, on a shell/comm
 go get -u github.com/tasosx/tools4clj/cmd/...
 ```
 
-You are ready to _go_ clojure... 
+You are ready to _go_ clojurdeps_and_clie... 
 
 For usage info try:
 ```

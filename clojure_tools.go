@@ -23,22 +23,46 @@ import (
 
 const usage = `Version: ` + version + ` of clojure tools
 
-Usage:  clojure [t4c-opt*] [dep-opt*] [--] [init-opt*] [main-opt] [arg*]
-        clj     [t4c-opt*] [dep-opt*] [--] [init-opt*] [main-opt] [arg*]
+Tools for Clojure (t4c) are binary alternatives 
+to the official CLI shell scripts: 'clj' and 'clojure'. 
 
-clojure executable is a runner for Clojure. clj is its wrapper
-for interactive repl use. These executables ultimately 
-construct and invoke a command-line of the form:
+---
 
-java [java-opt*] -cp classpath clojure.main [init-opt*] [main-opt] [arg*]
+You use the Clojure tools ('clj' or 'clojure') to run Clojure programs
+on the JVM, e.g. to start a REPL or invoke a specific function with data.
+The Clojure tools will configure the JVM process by defining a classpath
+(of desired libraries), an execution environment (JVM options) and
+specifying a main class and args. 
 
-The dep-opts are used to build the java-opts and classpath:
+Using a deps.edn file (or files), you tell Clojure where your source code
+resides and what libraries you need. Clojure will then calculate the full
+set of required libraries and a classpath, caching expensive parts of this
+process for better performance.
+
+The internal steps of the Clojure tools, as well as the Clojure functions
+you intend to run, are parameterized by data structures, often maps. Shell
+command lines are not optimized for passing nested data, so instead you
+will put the data structures in your deps.edn file and refer to them on the
+command line via 'aliases' - keywords that name data structures.
+
+'clj' and 'clojure' differ in that 'clj' has extra support for use as a REPL
+in a terminal, and should be preferred unless you don't want that support,
+then use 'clojure'.
+
+Usage:
+  Start a REPL   clj     [t4c-opt*] [clj-opt*] [init-opt*]
+  Exec function  clojure [t4c-opt*] [clj-opt*] -X:an-alias [kpath v]*
+  Run main       clojure [t4c-opt*] [clj-opt*] [--] [init-opt*] [main-opt] [arg*]
+
+The clj-opts are used to build the java-opts and classpath:
   -Jopt          Pass opt through in java_opts, ex: -J-Xmx512m
   -Oalias...     Concatenated jvm option aliases, ex: -O:mem
   -Ralias...     Concatenated resolve-deps aliases, ex: -R:bench:1.9
   -Calias...     Concatenated make-classpath aliases, ex: -C:dev
   -Malias...     Concatenated main option aliases, ex: -M:test
+  -Talias...     Concatenated tool option aliases, ex: -T:format-src
   -Aalias...     Concatenated aliases of any kind, ex: -A:dev:mem
+  -Xalias K V... Exec alias to invoke a function that takes a map, with keypath/value overrides
   -Sdeps EDN     Deps data to use as the last deps file to be merged
   -Spath         Compute classpath and echo to stdout only
   -Scp CP        Do NOT compute or cache classpath, use this one instead
@@ -67,8 +91,8 @@ main-opt:
   -h, -?, --help       Print this help message and exit
 
 t4c-opt:
---rebel        Used only by clj. Launches clj in a rebel-readline wrapper, 
-               instead of the rlwrap
+--rebel        Used only by clj tool. Launches clj in a rebel-readline wrapper, 
+               instead of the default rlwrap
 --native-args  Use unaltered, native, command line args parsing on Windows
                no need to set it on other platforms
 
@@ -79,7 +103,7 @@ For more info, see:
 `
 
 const (
-	version        = "1.10.1.561"
+	version        = "1.10.1.590"
 	depsEDN        = "deps.edn"
 	exampleDepsEDN = "example-deps.edn"
 	toolsTarGz     = "clojure-tools-" + version + ".tar.gz"
@@ -102,6 +126,7 @@ type t4cConfig struct {
 	cpFile        string
 	jvmFile       string
 	mainFile      string
+	basisFile     string
 	toolsArgs     []string
 }
 
@@ -110,6 +135,7 @@ func buildCmdConfigs(conf *t4cConfig, cacheDir string, ck string) {
 	conf.cpFile = path.Join(cacheDir, ck+".cp")
 	conf.jvmFile = path.Join(cacheDir, ck+".jvm")
 	conf.mainFile = path.Join(cacheDir, ck+".main")
+	conf.basisFile = path.Join(cacheDir, ck+".basis")
 }
 
 func getTools4CljPath() (string, error) {
