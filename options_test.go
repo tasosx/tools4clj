@@ -368,7 +368,7 @@ var testDepItems = []TestReadItem{
 				MainAliases:      ":argM",
 				ToolAliases:      ":argT",
 				AllAliases:       ":argA",
-				ExecAlias:        []string{":argX", "argX/K", "argX/V"},
+				ExecAlias:        []string{"-X:argX", "argX/K", "argX/V"},
 				DepsData:         `{:deps {clansi {:mvn/version "1.0.0"}}}`,
 				PrintClassPath:   true,
 				ForceCP:          `src:target:/classpath`,
@@ -608,13 +608,13 @@ var testDepItems = []TestReadItem{
 		},
 		"",
 	},
-	{ // clojure exec
+	{ // clojure exec -X
 		[]string{"clojure",
 			"-X:foo",
 		},
 		allOpts{
 			Clj: cljOpts{
-				ExecAlias: []string{":foo"},
+				ExecAlias: []string{"-X:foo"},
 			},
 			Init:       initOpts{},
 			Main:       mainOpts{},
@@ -624,7 +624,7 @@ var testDepItems = []TestReadItem{
 		},
 		"",
 	},
-	{ // clojure exec, with kv overrides
+	{ // clojure exec -X, with kv overrides
 		[]string{"clojure",
 			"-X:foo",
 			"[:y :z]",
@@ -632,7 +632,7 @@ var testDepItems = []TestReadItem{
 		},
 		allOpts{
 			Clj: cljOpts{
-				ExecAlias: []string{":foo", "[:y :z]", "1"},
+				ExecAlias: []string{"-X:foo", "[:y :z]", "1"},
 			},
 			Init:       initOpts{},
 			Main:       mainOpts{},
@@ -642,7 +642,7 @@ var testDepItems = []TestReadItem{
 		},
 		"",
 	},
-	{ // clojure exec, with kv overrides, and jvm options
+	{ // clojure exec -X, with kv overrides, and jvm options
 		[]string{"clojure",
 			"-X:foo",
 			"[:y :z]",
@@ -652,7 +652,61 @@ var testDepItems = []TestReadItem{
 		allOpts{
 			Clj: cljOpts{
 				JvmOpts:   []string{"argJ1", "argJ2"},
-				ExecAlias: []string{":foo", "[:y :z]", "1"},
+				ExecAlias: []string{"-X:foo", "[:y :z]", "1"},
+			},
+			Init:       initOpts{},
+			Main:       mainOpts{},
+			Args:       []string{},
+			NativeArgs: true,
+			Rlwrap:     false,
+		},
+		"",
+	},
+	{ // clojure exec -F
+		[]string{"clojure",
+			"-Fmy/fn",
+		},
+		allOpts{
+			Clj: cljOpts{
+				ExecAlias: []string{"-Fmy/fn"},
+			},
+			Init:       initOpts{},
+			Main:       mainOpts{},
+			Args:       []string{},
+			NativeArgs: true,
+			Rlwrap:     false,
+		},
+		"",
+	},
+	{ // clojure exec -F, with kv overrides
+		[]string{"clojure",
+			"-Fmy/fn",
+			"[:y :z]",
+			"1",
+		},
+		allOpts{
+			Clj: cljOpts{
+				ExecAlias: []string{"-Fmy/fn", "[:y :z]", "1"},
+			},
+			Init:       initOpts{},
+			Main:       mainOpts{},
+			Args:       []string{},
+			NativeArgs: true,
+			Rlwrap:     false,
+		},
+		"",
+	},
+	{ // clojure exec -F, with kv overrides, and jvm options
+		[]string{"clojure",
+			"-Fmy/fn",
+			"[:y :z]",
+			"1",
+			"-JargJ1", "-JargJ2",
+		},
+		allOpts{
+			Clj: cljOpts{
+				JvmOpts:   []string{"argJ1", "argJ2"},
+				ExecAlias: []string{"-Fmy/fn", "[:y :z]", "1"},
 			},
 			Init:       initOpts{},
 			Main:       mainOpts{},

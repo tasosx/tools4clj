@@ -75,18 +75,14 @@ func printTreeCmd(conf *t4cConfig, toolsClassPath string) exec.Cmd {
 }
 
 func clojureExecuteCmd(jvmCacheOpts []string, jvmOpts []string, basisFile string,
-	cp string, execAlias []string) exec.Cmd {
+	toolsDir string, cp string, execAlias []string) exec.Cmd {
 
 	cmdArgs := append([]string{}, jvmCacheOpts...)
 	cmdArgs = append(cmdArgs, jvmOpts...)
-	cmdArgs = append(cmdArgs, "-Dclojure.basisfile="+basisFile, "-classpath", cp, "clojure.main")
-	cmdArgs = append(cmdArgs, "-m", "clojure.tools.deps.alpha.exec")
-	if len(execAlias) > 0 {
-		cmdArgs = append(cmdArgs, "-X"+execAlias[0])
-	}
-	if len(execAlias) > 1 {
-		cmdArgs = append(cmdArgs, execAlias[1:]...)
-	}
+	cmdArgs = append(cmdArgs, "-Dclojure.basis="+basisFile,
+		"-classpath", toolsDir+string(os.PathListSeparator)+cp)
+	cmdArgs = append(cmdArgs, "clojure.main", "-m", "clj-exec")
+	cmdArgs = append(cmdArgs, execAlias...)
 
 	var cmd = exec.Command(javaPath, cmdArgs...)
 

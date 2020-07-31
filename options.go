@@ -172,8 +172,8 @@ func setCljOpts(all *allOpts, args []string, pos int) (int, error) {
 			all.Clj.ToolAliases += strings.TrimPrefix(args[pos], "-T")
 		} else if strings.HasPrefix(args[pos], "-A") {
 			all.Clj.AllAliases += strings.TrimPrefix(args[pos], "-A")
-		} else if strings.HasPrefix(args[pos], "-X") {
-			all.Clj.ExecAlias = append(all.Clj.ExecAlias, strings.TrimPrefix(args[pos], "-X"))
+		} else if strings.HasPrefix(args[pos], "-X") || strings.HasPrefix(args[pos], "-F") {
+			all.Clj.ExecAlias = append(all.Clj.ExecAlias, args[pos])
 			for pos < len(args)-1 && !strings.HasPrefix(args[pos+1], "-") {
 				pos++
 				all.Clj.ExecAlias = append(all.Clj.ExecAlias, args[pos])
@@ -431,7 +431,7 @@ func use(options *allOpts) error {
 			jvmCacheOpts = strings.Split(string(b), " ")
 		}
 		err := safeStart(clojureExecuteCmd(jvmCacheOpts, options.Clj.JvmOpts,
-			config.basisFile, cp, options.Clj.ExecAlias))
+			config.basisFile, tools4CljDir, cp, options.Clj.ExecAlias))
 		if err != nil {
 			return err
 		}

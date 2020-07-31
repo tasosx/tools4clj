@@ -52,6 +52,7 @@ then use 'clojure'.
 Usage:
   Start a REPL   clj     [t4c-opt*] [clj-opt*] [init-opt*]
   Exec function  clojure [t4c-opt*] [clj-opt*] -X:an-alias [kpath v]*
+                 clojure [t4c-opt*] [clj-opt*] -Ffn [kpath v]*
   Run main       clojure [t4c-opt*] [clj-opt*] [--] [init-opt*] [main-opt] [arg*]
 
 The clj-opts are used to build the java-opts and classpath:
@@ -63,6 +64,7 @@ The clj-opts are used to build the java-opts and classpath:
   -Talias...     Concatenated tool option aliases, ex: -T:format-src
   -Aalias...     Concatenated aliases of any kind, ex: -A:dev:mem
   -Xalias K V... Exec alias to invoke a function that takes a map, with keypath/value overrides
+  -Fmy/fn K V... Exec function myfn that takes a map, with keypath/value overrides
   -Sdeps EDN     Deps data to use as the last deps file to be merged
   -Spath         Compute classpath and echo to stdout only
   -Scp CP        Do NOT compute or cache classpath, use this one instead
@@ -103,9 +105,10 @@ For more info, see:
 `
 
 const (
-	version        = "1.10.1.590"
+	version        = "1.10.1.615"
 	depsEDN        = "deps.edn"
 	exampleDepsEDN = "example-deps.edn"
+	cljExecCLJ     = "clj_exec.clj"
 	toolsTarGz     = "clojure-tools-" + version + ".tar.gz"
 	toolsURL       = "https://download.clojure.org/install/" + toolsTarGz
 	toolsJar       = "clojure-tools-" + version + ".jar"
@@ -182,7 +185,8 @@ func getClojureTools(toolsDir string) error {
 
 	if fileExists(path.Join(toolsDir, toolsJar)) &&
 		fileExists(path.Join(toolsDir, depsEDN)) &&
-		fileExists(path.Join(toolsDir, exampleDepsEDN)) {
+		fileExists(path.Join(toolsDir, exampleDepsEDN)) &&
+		fileExists(path.Join(toolsDir, cljExecCLJ)) {
 		return nil
 	}
 
@@ -200,7 +204,12 @@ func getClojureTools(toolsDir string) error {
 	fmt.Println("[t4c] - extracting needed clojure tools files")
 
 	// extract the needed files
-	err = pickFiles(toolsDir, tarPathTmp, []string{depsEDN, exampleDepsEDN, toolsJar})
+	err = pickFiles(toolsDir, tarPathTmp, []string{
+		depsEDN,
+		exampleDepsEDN,
+		cljExecCLJ,
+		toolsJar,
+	})
 	if err != nil {
 		return err
 	}

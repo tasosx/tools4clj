@@ -4,7 +4,7 @@
 In the shadows of the official clojure tools:
 
 ```
-const version = "1.10.1.590"
+const version = "1.10.1.615"
 ```
 
 
@@ -12,30 +12,29 @@ const version = "1.10.1.590"
 
 This is the **_go_ tools for clojure**. 
 
-The _t4c_ installation produces two binaries that follow closely the functionality of **clojure/brew-install** command line scripts:
+The _tools4clj_ build produces two binaries that follow closely the functionality of **clojure/brew-install** command line scripts:
 - the `clojure` binary launcher of the official clojure tools, and
-- the `clj` binary, which uses `rlwrap` readline wrapper, for interactive repl use
+- the `clj` binary, which launches the official clojure tools within a `rlwrap` readline wrapper, intended for interactive repl use.
 
-Also, `clj --rebel` runs an extended version of clj that, instead of using `rlwrap`, it uses the terminal readline library **bhauman/rebel-readline**, giving a more polished look and feel. 
-
-Note: on Windows *rebel* prompt, a long running function can not be stopped by Ctrl+C. Use the task manager... 
-
-Although *rebel* extension looks great, it is a bit slow sometimes, so it may not always be the choice of heart. Thats why *rlwrap'ed clj* is the default.
-
-Please, report any bugs at https://github.com/tasosx/tools4clj/issues, stating your platform, and steps to reproduce them, along with actual and expected results.
-
-Plan is to keep this project up to date with _clojure/brew-install_ changes. 
+Plan is to keep this project up to date with _clojure/brew-install_ changes (focused on stable releases).
 
 Any requests/PRs for features are welcome, as long as they do not stray from the plan.
+
+Please, report any bugs at https://github.com/tasosx/tools4clj/issues, stating your platform, and steps to reproduce them, along with actual and expected results.
 
 ## Why this?
 
 ### Is there something different compared to official clojure/clj tools?
 
-- An easy entrance to clojure world for go users. If you are a go user you are one command line away from clojured happiness.
-- Resolve Windows quoting differences. No need to think quotes-translation-for-Windows. One clojure/clj tools command to run anywhere. So pick a published deps cli example on the internet and run it directly on Windows (99% of the deps-cli clojure examples are directed to POSIX users anyways).
+For a Go user:
+- An easy entrance to clojure world. If you are a go user you are one command line away from clojured happiness.
+
+For a Windows user:
+- Resolve Windows (powershell/cmd/bash) quotes handling differences. One clojure/clj tools command to run anywhere. So pick a published deps clj/clojure command line example on the internet and run it on Windows, with no need to change/escape the quotes.
+
+For any user:
+- Same update procedure to all supported platforms.
 - A pretty clojure repl. Use rebel when you want to view/display a prettier clojure dev UI.
-- Same and simple update procedure to all supported platforms.
 
 ### Is it only for Windows?
 
@@ -48,7 +47,7 @@ If you need to override this behaviour, and want to use the native Windows argum
 
 ## Based upon...
 
-Tried to keep the usage of this project's produced binaries inline with the official CLI tools, with the exception of the installation directory. This project uses `~/.tools4clj/[version]` folder for the installation of `deps.edn`, `example-deps.edn` and `clojure-tools-X.Y.Z.jar` files, and the `%GOPATH%/bin` folder for the binaries.
+Tried to keep the usage of this project's produced binaries inline with the official CLI tools, with the exception of the installation directory. This project uses `~/.tools4clj/[version]` folder for the installation of `deps.edn`, `example-deps.edn`, `clj_exec.clj` and `clojure-tools-X.Y.Z.jar` files, and the `%GOPATH%/bin` folder for the binaries.
 
 Check:
 - https://clojure.org/reference/deps_and_cli for a Deps and CLI detailed reference
@@ -78,6 +77,12 @@ So an one-liner for a tools update is:
 go get -u github.com/tasosx/tools4clj/cmd/... && clojure
 ```
 
+Also, `clj --rebel` runs an extended version of clj that, instead of using `rlwrap`, it uses the terminal readline library **bhauman/rebel-readline**, giving a more polished look and feel. 
+
+Note: on Windows *rebel* prompt, a long running function can not be stopped by Ctrl+C. Use the task manager... 
+
+Although *rebel* extension looks great, it is a bit slow sometimes, so it may not always be the choice of heart. Thats why *rlwrap'ed clj* is the default.
+
 Looks and feel of `clj --rebel` are configurable through the `rebel-readline` options:
 
 https://github.com/bhauman/rebel-readline/#config
@@ -85,21 +90,31 @@ https://github.com/bhauman/rebel-readline/#config
 
 ## More
 
+### Clojure
+
 https://clojure.org/guides/getting_started
+
+### Clojure official CLI tools
 
 https://clojure.org/guides/deps_and_cli
 
-https://clojure.org/reference/deps_and_cli#_usage
-
-https://github.com/clojure/tools.cli
-
 https://github.com/clojure/brew-install
+
+### Readliners
 
 https://github.com/hanslub42/rlwrap
 
 https://github.com/bhauman/rebel-readline
 
+### Go
+
 https://golang.org/doc/code.html#GOPATH
+
+### Windows "quotes" issue (fixed in tools4clj)
+
+https://clojure.atlassian.net/browse/TDEPS-121
+
+https://clojure.atlassian.net/browse/TDEPS-133
 
 https://clojure.atlassian.net/browse/TDEPS-136
 

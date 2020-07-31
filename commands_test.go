@@ -13,6 +13,7 @@
 package tools4clj
 
 import (
+	"os"
 	"os/exec"
 	"runtime"
 	"testing"
@@ -182,36 +183,65 @@ func TestClojureExecuteCmd(t *testing.T) {
 		basisFile: "test-basis-file",
 	}
 	cp := "test-class-path"
-	execAlias := []string{":foo", "[:y :z]", "1"}
 
-	cmd := clojureExecuteCmd(jvmCacheOpts, jvmOpts, conf.basisFile,
-		cp, execAlias)
-
-	expected := []string{}
-
-	// test clojure execute args
+	// test clojure -X execute args
 	{
+		execAlias := []string{"-X:foo", "[:y :z]", "1"}
+
+		cmd := clojureExecuteCmd(jvmCacheOpts, jvmOpts, conf.basisFile,
+			tools4CljDir, cp, execAlias)
+
+		expected := []string{}
+
 		expected = []string{javaPath}
 		expected = append(expected, jvmCacheOpts...)
 		expected = append(expected, jvmOpts...)
-		expected = append(expected, "-Dclojure.basisfile="+conf.basisFile, "-classpath", cp, "clojure.main")
-		expected = append(expected, "-m", "clojure.tools.deps.alpha.exec")
-		if len(execAlias) > 0 {
-			expected = append(expected, "-X"+execAlias[0])
-		}
-		if len(execAlias) > 1 {
-			expected = append(expected, execAlias[1:]...)
-		}
+		expected = append(expected, "-Dclojure.basis="+conf.basisFile,
+			"-classpath", tools4CljDir+string(os.PathListSeparator)+cp)
+		expected = append(expected, "clojure.main", "-m", "clj-exec")
+		expected = append(expected, execAlias...)
+
 		expected = removeEmpty(expected)
 
 		if len(cmd.Args) != len(expected) {
-			t.Errorf("clojureExecuteCmd failed, args expected %v, got %v", len(expected), len(cmd.Args))
+			t.Errorf("clojureExecuteCmd (-X) failed, args expected %v, got %v", len(expected), len(cmd.Args))
 			t.FailNow()
 		}
 
 		for i, v := range cmd.Args {
 			if v != expected[i] {
-				t.Errorf("clojureExecuteCmd failed, arg expected %v, got %v", expected[i], v)
+				t.Errorf("clojureExecuteCmd (-X) failed, arg expected %v, got %v", expected[i], v)
+			}
+		}
+	}
+
+	// test clojure -F execute args
+	{
+		execAlias := []string{"-Fmy/fn", "[:y :z]", "1"}
+
+		cmd := clojureExecuteCmd(jvmCacheOpts, jvmOpts, conf.basisFile,
+			tools4CljDir, cp, execAlias)
+
+		expected := []string{}
+
+		expected = []string{javaPath}
+		expected = append(expected, jvmCacheOpts...)
+		expected = append(expected, jvmOpts...)
+		expected = append(expected, "-Dclojure.basis="+conf.basisFile,
+			"-classpath", tools4CljDir+string(os.PathListSeparator)+cp)
+		expected = append(expected, "clojure.main", "-m", "clj-exec")
+		expected = append(expected, execAlias...)
+
+		expected = removeEmpty(expected)
+
+		if len(cmd.Args) != len(expected) {
+			t.Errorf("clojureExecuteCmd (-F) failed, args expected %v, got %v", len(expected), len(cmd.Args))
+			t.FailNow()
+		}
+
+		for i, v := range cmd.Args {
+			if v != expected[i] {
+				t.Errorf("clojureExecuteCmd (-F) failed, arg expected %v, got %v", expected[i], v)
 			}
 		}
 	}
