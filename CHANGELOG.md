@@ -6,6 +6,9 @@ https://github.com/clojure/brew-install/blob/1.10.1/CHANGELOG.md
 
 ## Releases
 
+- Thirteenth release [2020-08-02]
+    - Based on clojure tools v.1.10.1.619
+ 
 - Twelfth release [2020-07-31]
     - Based on clojure tools v.1.10.1.615
  

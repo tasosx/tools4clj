@@ -63,8 +63,8 @@ The clj-opts are used to build the java-opts and classpath:
   -Malias...     Concatenated main option aliases, ex: -M:test
   -Talias...     Concatenated tool option aliases, ex: -T:format-src
   -Aalias...     Concatenated aliases of any kind, ex: -A:dev:mem
-  -Xalias K V... Exec alias to invoke a function that takes a map, with keypath/value overrides
-  -Fmy/fn K V... Exec function myfn that takes a map, with keypath/value overrides
+  -Xalias K V... Exec alias to invoke a function that takes a map, with KV overrides
+  -Fmy/fn K V... Exec function my/fn that takes a map, with KV overrides
   -Sdeps EDN     Deps data to use as the last deps file to be merged
   -Spath         Compute classpath and echo to stdout only
   -Scp CP        Do NOT compute or cache classpath, use this one instead
@@ -105,7 +105,7 @@ For more info, see:
 `
 
 const (
-	version        = "1.10.1.615"
+	version        = "1.10.1.619"
 	depsEDN        = "deps.edn"
 	exampleDepsEDN = "example-deps.edn"
 	cljExecCLJ     = "clj_exec.clj"
