@@ -50,29 +50,26 @@ in a terminal, and should be preferred unless you don't want that support,
 then use 'clojure'.
 
 Usage:
-  Start a REPL   clj     [t4c-opt*] [clj-opt*] [init-opt*]
-  Exec function  clojure [t4c-opt*] [clj-opt*] -X:an-alias [kpath v]*
-                 clojure [t4c-opt*] [clj-opt*] -Ffn [kpath v]*
-  Run main       clojure [t4c-opt*] [clj-opt*] [--] [init-opt*] [main-opt] [arg*]
+  Start a REPL   clj     [t4c-opt*] [clj-opt*] [-A:aliases] [init-opt*]
+  Exec function  clojure [t4c-opt*] [clj-opt*] -X[:aliases] [a/fn] [kpath v]*
+  Run main       clojure [t4c-opt*] [clj-opt*] -M[:aliases] [init-opt*] [main-opt] [arg*]
+  Prepare        clojure [t4c-opt*] [clj-opt*] -P [other exec opts]
 
-The clj-opts are used to build the java-opts and classpath:
+exec-opts:
+  -A:aliases     Use aliases to modify classpath
+  -X[:aliases]   Use aliases to modify classpath or supply exec fn/args
+  -M[:aliases]   Use aliases to modify classpath or supply main opts
+  -P             Prepare deps - download libs, cache classpath, but don't exec
+
+clj-opts:
   -Jopt          Pass opt through in java_opts, ex: -J-Xmx512m
-  -Oalias...     Concatenated jvm option aliases, ex: -O:mem
-  -Ralias...     Concatenated resolve-deps aliases, ex: -R:bench:1.9
-  -Calias...     Concatenated make-classpath aliases, ex: -C:dev
-  -Malias...     Concatenated main option aliases, ex: -M:test
-  -Talias...     Concatenated tool option aliases, ex: -T:format-src
-  -Aalias...     Concatenated aliases of any kind, ex: -A:dev:mem
-  -Xalias K V... Exec alias to invoke a function that takes a map, with KV overrides
-  -Fmy/fn K V... Exec function my/fn that takes a map, with KV overrides
   -Sdeps EDN     Deps data to use as the last deps file to be merged
   -Spath         Compute classpath and echo to stdout only
+  -Spom          Generate (or update) pom.xml with deps and paths
+  -Stree         Print dependency tree
   -Scp CP        Do NOT compute or cache classpath, use this one instead
   -Srepro        Ignore the ~/.clojure/deps.edn config file
   -Sforce        Force recomputation of the classpath (don't use the cache)
-  -Spom          Generate (or update existing) pom.xml with deps and paths
-  -Stree         Print dependency tree
-  -Sresolve-tags Resolve git coordinate tags to shas and update deps.edn
   -Sverbose      Print important path info to console
   -Sdescribe     Print environment and command parsing info as data
   -Sthreads N    Set specific number of download threads
@@ -80,17 +77,22 @@ The clj-opts are used to build the java-opts and classpath:
   --             Stop parsing dep options and pass remaining arguments to clojure.main
 
 init-opt:
-  -i, --init path      Load a file or resource
-  -e, --eval string    Eval exprs in string; print non-nil values
-      --report target  Report uncaught exception to "file" (default), "stderr", or "none", 
-                       overrides System property clojure.main.report
+  -i, --init path     Load a file or resource
+  -e, --eval string   Eval exprs in string; print non-nil values
+  --report target     Report uncaught exception to "file" (default), "stderr", or "none"
 
 main-opt:
-  -m, --main ns-name   Call the -main function from namespace w/args
-  -r, --repl           Run a repl
-  path                 Run a script from a file or resource
-  -                    Run a script from standard input
-  -h, -?, --help       Print this help message and exit
+  -m, --main ns-name  Call the -main function from namespace w/args
+  -r, --repl          Run a repl
+  path                Run a script from a file or resource
+  -                   Run a script from standard input
+  -h, -?, --help      Print this help message and exit
+
+Programs provided by :deps alias:
+  -X:deps mvn-install       Install a maven jar to the local repository cache
+  -X:deps git-resolve-tags  Resolve git coord tags to shas and update deps.edn
+
+---
 
 t4c-opt:
 --rebel        Used only by clj tool. Launches clj in a rebel-readline wrapper, 
@@ -105,19 +107,21 @@ For more info, see:
 `
 
 const (
-	version        = "1.10.1.619"
+	version        = "1.10.1.697"
 	depsEDN        = "deps.edn"
 	exampleDepsEDN = "example-deps.edn"
-	cljExecCLJ     = "clj_exec.clj"
 	toolsTarGz     = "clojure-tools-" + version + ".tar.gz"
 	toolsURL       = "https://download.clojure.org/install/" + toolsTarGz
 	toolsJar       = "clojure-tools-" + version + ".jar"
+	libexecDir     = "libexec"
+	execJar        = "exec.jar"
 	t4cHome        = ".tools4clj"
 )
 
 var (
 	tools4CljDir = ""
 	toolsCp      = ""
+	execCp       = ""
 	javaPath     = ""
 	config       t4cConfig
 )
@@ -177,6 +181,14 @@ func getToolsCp(toolsDir string) (string, error) {
 	return path.Join(toolsDir, toolsJar), nil
 }
 
+func getExecCp(toolsDir string) (string, error) {
+	if toolsDir == "" {
+		return "", errors.New("empty install dir")
+	}
+
+	return path.Join(toolsDir, execJar), nil
+}
+
 func getClojureTools(toolsDir string) error {
 	err := os.MkdirAll(toolsDir, os.ModePerm)
 	if err != nil {
@@ -184,9 +196,9 @@ func getClojureTools(toolsDir string) error {
 	}
 
 	if fileExists(path.Join(toolsDir, toolsJar)) &&
+		fileExists(path.Join(toolsDir, execJar)) &&
 		fileExists(path.Join(toolsDir, depsEDN)) &&
-		fileExists(path.Join(toolsDir, exampleDepsEDN)) &&
-		fileExists(path.Join(toolsDir, cljExecCLJ)) {
+		fileExists(path.Join(toolsDir, exampleDepsEDN)) {
 		return nil
 	}
 
@@ -207,7 +219,7 @@ func getClojureTools(toolsDir string) error {
 	err = pickFiles(toolsDir, tarPathTmp, []string{
 		depsEDN,
 		exampleDepsEDN,
-		cljExecCLJ,
+		execJar,
 		toolsJar,
 	})
 	if err != nil {

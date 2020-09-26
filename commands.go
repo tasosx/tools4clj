@@ -20,15 +20,6 @@ import (
 	"syscall"
 )
 
-func resolveTagsCmd(toolsClassPath string) exec.Cmd {
-	var cmd = exec.Command(javaPath, "-classpath", toolsClassPath,
-		"clojure.main",
-		"-m", "clojure.tools.deps.alpha.script.resolve-tags",
-		"--deps-file=deps.edn")
-
-	return *cmd
-}
-
 func makeClassPathCmd(conf *t4cConfig, toolsClassPath string) exec.Cmd {
 	cmdArgs := append([]string{}, "-classpath", toolsClassPath,
 		"clojure.main",
@@ -73,16 +64,18 @@ func printTreeCmd(conf *t4cConfig, toolsClassPath string) exec.Cmd {
 
 	return *cmd
 }
-
 func clojureExecuteCmd(jvmCacheOpts []string, jvmOpts []string, basisFile string,
-	toolsDir string, cp string, execAlias []string) exec.Cmd {
+	execJarPath string, cp string, execAliases string, args []string) exec.Cmd {
 
 	cmdArgs := append([]string{}, jvmCacheOpts...)
 	cmdArgs = append(cmdArgs, jvmOpts...)
 	cmdArgs = append(cmdArgs, "-Dclojure.basis="+basisFile,
-		"-classpath", toolsDir+string(os.PathListSeparator)+cp)
-	cmdArgs = append(cmdArgs, "clojure.main", "-m", "clj-exec")
-	cmdArgs = append(cmdArgs, execAlias...)
+		"-classpath", cp+string(os.PathListSeparator)+execJarPath)
+	cmdArgs = append(cmdArgs, "clojure.main", "-m", "clojure.run.exec")
+	if len(execAliases) > 0 {
+		cmdArgs = append(cmdArgs, "--aliases", execAliases)
+	}
+	cmdArgs = append(cmdArgs, args...)
 
 	var cmd = exec.Command(javaPath, cmdArgs...)
 

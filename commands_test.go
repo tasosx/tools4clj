@@ -19,32 +19,6 @@ import (
 	"testing"
 )
 
-func TestResolveTagsCmd(t *testing.T) {
-	toolsCpDir := "test-cpTools-dir"
-	cmd := resolveTagsCmd(toolsCpDir)
-
-	// test args
-	{
-		expected := []string{
-			javaPath, "-classpath", toolsCpDir,
-			"clojure.main",
-			"-m", "clojure.tools.deps.alpha.script.resolve-tags",
-			"--deps-file=deps.edn",
-		}
-
-		if len(cmd.Args) != len(expected) {
-			t.Errorf("resolveTagsCmd failed, args expected %v, got %v", len(expected), len(cmd.Args))
-			t.FailNow()
-		}
-
-		for i, v := range cmd.Args {
-			if v != expected[i] {
-				t.Errorf("resolveTagsCmd failed, arg expected %v, got %v", expected[i], v)
-			}
-		}
-	}
-}
-
 func TestMakeClassPathCmd(t *testing.T) {
 	toolsCpDir := "test-cpTools-dir"
 
@@ -96,49 +70,6 @@ func TestMakeClassPathCmd(t *testing.T) {
 	}
 }
 
-func TestGeneratePomCmd(t *testing.T) {
-	toolsCpDir := "test-cpTools-dir"
-
-	conf := t4cConfig{
-		configUser:    "test-config-user",
-		configProject: "test-config-project",
-		toolsArgs: []string{
-			"arg1",
-			"arg2",
-			"arg3",
-			"",
-			"",
-		},
-	}
-
-	cmd := generatePomCmd(&conf, toolsCpDir)
-
-	// test args
-	{
-		expected := []string{
-			javaPath, "-classpath", toolsCpDir,
-			"clojure.main",
-			"-m", "clojure.tools.deps.alpha.script.generate-manifest2",
-			"--config-user", conf.configUser,
-			"--config-project", conf.configProject,
-			"--gen=pom",
-		}
-		expected = append(expected, conf.toolsArgs...)
-		expected = removeEmpty(expected)
-
-		if len(cmd.Args) != len(expected) {
-			t.Errorf("generatePomCmd failed, args expected %v, got %v", len(expected), len(cmd.Args))
-			t.FailNow()
-		}
-
-		for i, v := range cmd.Args {
-			if v != expected[i] {
-				t.Errorf("generatePomCmd failed, arg expected %v, got %v", expected[i], v)
-			}
-		}
-	}
-}
-
 func TestPrintTreeCmd(t *testing.T) {
 	toolsCpDir := "test-cpTools-dir"
 
@@ -183,23 +114,23 @@ func TestClojureExecuteCmd(t *testing.T) {
 		basisFile: "test-basis-file",
 	}
 	cp := "test-class-path"
+	execJarPath := "exec-jar-path"
 
-	// test clojure -X execute args
+	// test clojure -X execute, no aliases, no args
 	{
-		execAlias := []string{"-X:foo", "[:y :z]", "1"}
+		execAliases := ""
+		args := []string{}
 
 		cmd := clojureExecuteCmd(jvmCacheOpts, jvmOpts, conf.basisFile,
-			tools4CljDir, cp, execAlias)
+			execJarPath, cp, execAliases, args)
 
-		expected := []string{}
+		expected := []string{javaPath}
 
-		expected = []string{javaPath}
 		expected = append(expected, jvmCacheOpts...)
 		expected = append(expected, jvmOpts...)
 		expected = append(expected, "-Dclojure.basis="+conf.basisFile,
-			"-classpath", tools4CljDir+string(os.PathListSeparator)+cp)
-		expected = append(expected, "clojure.main", "-m", "clj-exec")
-		expected = append(expected, execAlias...)
+			"-classpath", cp+string(os.PathListSeparator)+execJarPath)
+		expected = append(expected, "clojure.main", "-m", "clojure.run.exec")
 
 		expected = removeEmpty(expected)
 
@@ -215,33 +146,104 @@ func TestClojureExecuteCmd(t *testing.T) {
 		}
 	}
 
-	// test clojure -F execute args
+	// test clojure -X execute, with aliases, no args
 	{
-		execAlias := []string{"-Fmy/fn", "[:y :z]", "1"}
+		execAliases := ":foo"
+		args := []string{}
 
 		cmd := clojureExecuteCmd(jvmCacheOpts, jvmOpts, conf.basisFile,
-			tools4CljDir, cp, execAlias)
+			execJarPath, cp, execAliases, args)
 
-		expected := []string{}
+		expected := []string{javaPath}
 
-		expected = []string{javaPath}
 		expected = append(expected, jvmCacheOpts...)
 		expected = append(expected, jvmOpts...)
 		expected = append(expected, "-Dclojure.basis="+conf.basisFile,
-			"-classpath", tools4CljDir+string(os.PathListSeparator)+cp)
-		expected = append(expected, "clojure.main", "-m", "clj-exec")
-		expected = append(expected, execAlias...)
+			"-classpath", cp+string(os.PathListSeparator)+execJarPath)
+		expected = append(expected, "clojure.main", "-m", "clojure.run.exec")
+		if len(execAliases) > 0 {
+			expected = append(expected, "--aliases", execAliases)
+		}
+		expected = append(expected, args...)
 
 		expected = removeEmpty(expected)
 
 		if len(cmd.Args) != len(expected) {
-			t.Errorf("clojureExecuteCmd (-F) failed, args expected %v, got %v", len(expected), len(cmd.Args))
+			t.Errorf("clojureExecuteCmd (-X:foo) failed, args expected %v, got %v", len(expected), len(cmd.Args))
 			t.FailNow()
 		}
 
 		for i, v := range cmd.Args {
 			if v != expected[i] {
-				t.Errorf("clojureExecuteCmd (-F) failed, arg expected %v, got %v", expected[i], v)
+				t.Errorf("clojureExecuteCmd (-X:foo) failed, arg expected %v, got %v", expected[i], v)
+			}
+		}
+	}
+
+	// test clojure -X execute, no aliases, with args
+	{
+		execAliases := ""
+		args := []string{"arg1", "arg2"}
+
+		cmd := clojureExecuteCmd(jvmCacheOpts, jvmOpts, conf.basisFile,
+			execJarPath, cp, execAliases, args)
+
+		expected := []string{javaPath}
+
+		expected = append(expected, jvmCacheOpts...)
+		expected = append(expected, jvmOpts...)
+		expected = append(expected, "-Dclojure.basis="+conf.basisFile,
+			"-classpath", cp+string(os.PathListSeparator)+execJarPath)
+		expected = append(expected, "clojure.main", "-m", "clojure.run.exec")
+		if len(execAliases) > 0 {
+			expected = append(expected, "--aliases", execAliases)
+		}
+		expected = append(expected, args...)
+
+		expected = removeEmpty(expected)
+
+		if len(cmd.Args) != len(expected) {
+			t.Errorf("clojureExecuteCmd (-X arg1 arg2) failed, args expected %v, got %v", len(expected), len(cmd.Args))
+			t.FailNow()
+		}
+
+		for i, v := range cmd.Args {
+			if v != expected[i] {
+				t.Errorf("clojureExecuteCmd (-X arg1 arg2) failed, arg expected %v, got %v", expected[i], v)
+			}
+		}
+	}
+
+	// test clojure -X execute, with aliases, and args
+	{
+		execAliases := ":foo"
+		args := []string{"arg1", "arg2"}
+
+		cmd := clojureExecuteCmd(jvmCacheOpts, jvmOpts, conf.basisFile,
+			execJarPath, cp, execAliases, args)
+
+		expected := []string{javaPath}
+
+		expected = append(expected, jvmCacheOpts...)
+		expected = append(expected, jvmOpts...)
+		expected = append(expected, "-Dclojure.basis="+conf.basisFile,
+			"-classpath", cp+string(os.PathListSeparator)+execJarPath)
+		expected = append(expected, "clojure.main", "-m", "clojure.run.exec")
+		if len(execAliases) > 0 {
+			expected = append(expected, "--aliases", execAliases)
+		}
+		expected = append(expected, args...)
+
+		expected = removeEmpty(expected)
+
+		if len(cmd.Args) != len(expected) {
+			t.Errorf("clojureExecuteCmd (-X:foo arg1 arg2) failed, args expected %v, got %v", len(expected), len(cmd.Args))
+			t.FailNow()
+		}
+
+		for i, v := range cmd.Args {
+			if v != expected[i] {
+				t.Errorf("clojureExecuteCmd (-X:foo arg1 arg2) failed, arg expected %v, got %v", expected[i], v)
 			}
 		}
 	}

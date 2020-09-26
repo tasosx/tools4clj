@@ -171,7 +171,7 @@ func pickFiles(toolsDir string, tarPath string, files []string) error {
 					return err
 				}
 				fmt.Printf("[t4c] - %s: ", hdr.Name)
-				fmt.Printf("... copied to %s", f)
+				fmt.Printf("... copied to %s", path.Join(f))
 				fmt.Println()
 			}
 		}

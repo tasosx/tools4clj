@@ -33,6 +33,11 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
+
+	execCp, err = getExecCp(tools4CljDir)
+	if err != nil {
+		panic(err)
+	}
 }
 
 // RunClojure runs clojure using the official clojure tools
@@ -49,7 +54,7 @@ func runClojure(osArgs []string, cljRun bool) {
 	// download official clojure tools
 	err := getClojureTools(tools4CljDir)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 
@@ -58,7 +63,7 @@ func runClojure(osArgs []string, cljRun bool) {
 	// read and set command line options
 	err = read(&opts, osArgs, cljRun)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 
@@ -71,7 +76,7 @@ func runClojure(osArgs []string, cljRun bool) {
 	err = use(&opts)
 	if err != nil {
 		if opts.Clj.Verbose {
-			fmt.Println(err)
+			fmt.Fprintln(os.Stderr, err)
 		}
 		os.Exit(1)
 	}

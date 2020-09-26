@@ -77,22 +77,53 @@ func TestGetJavaPath(t *testing.T) {
 }
 
 func TestGetToolsCp(t *testing.T) {
-	dir := "test-tools4clj-dir"
-
+	dir := ""
 	toolsCp, err := getToolsCp(dir)
+	if err == nil {
+		t.Errorf("expected to get an error for empty tools jar path")
+	}
+
+	dir = "test-tools4clj-dir"
+
+	toolsCp, err = getToolsCp(dir)
 	if err != nil {
-		t.Errorf("failed to get tools cp path: %v", err)
+		t.Errorf("failed to get tools class path: %v", err)
 	}
 	expected := path.Join(dir, toolsJar)
 	if toolsCp != expected {
-		t.Errorf("failed getting tools cp, expected %v, got %v", expected, toolsCp)
+		t.Errorf("failed getting tools class path, expected %v, got %v", expected, toolsCp)
+	}
+}
+
+func TestGetExecJarPath(t *testing.T) {
+	dir := ""
+	execCp, err := getExecCp(dir)
+	if err == nil {
+		t.Errorf("expected to get an error for empty exec jar path")
+	}
+
+	dir = "test-tools4clj-dir"
+
+	execCp, err = getExecCp(dir)
+	if err != nil {
+		t.Errorf("failed to get exec jar path: %v", err)
+	}
+	expected := path.Join(dir, execJar)
+	if execCp != expected {
+		t.Errorf("failed getting exec jar path, expected %v, got %v", expected, execCp)
 	}
 }
 
 func TestGetClojureTools(t *testing.T) {
-	dir := "testdata"
-
+	dir := ""
 	err := getClojureTools(dir)
+	if err == nil {
+		t.Errorf("expected to get an error for empty download dir creation")
+	}
+
+	dir = "testdata"
+
+	err = getClojureTools(dir)
 	if err != nil {
 		t.Errorf("failed to download clojure tools with error: %v", err)
 	}
