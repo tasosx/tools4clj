@@ -700,7 +700,7 @@ var testDepItems = []TestReadItem{
 		},
 		"-T is no longer supported, use -A with repl, -M for main, or -X for exec",
 	},
-	{ // not supported: -T
+	{ // not supported: -Sresolve-tags
 		[]string{"clojure",
 			"-Sresolve-tags",
 		},
@@ -714,6 +714,21 @@ var testDepItems = []TestReadItem{
 			Mode:       "repl",
 		},
 		"Option changed, use: clj -X:deps git-resolve-tags",
+	},
+	{ // not supported: -A without an alias
+		[]string{"clojure",
+			"-A",
+		},
+		allOpts{
+			Clj:        cljOpts{},
+			Init:       initOpts{},
+			Main:       mainOpts{},
+			Args:       []string{},
+			NativeArgs: true,
+			Rlwrap:     false,
+			Mode:       "repl",
+		},
+		"-A requires an alias",
 	},
 }
 

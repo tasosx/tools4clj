@@ -170,6 +170,8 @@ func setCljOpts(all *allOpts, args []string, pos int) (int, error) {
 			return pos, errors.New("-O is no longer supported, use -A with repl, -M for main, or -X for exec")
 		} else if strings.HasPrefix(args[pos], "-T") {
 			return pos, errors.New("-T is no longer supported, use -A with repl, -M for main, or -X for exec")
+		} else if args[pos] == "-A" {
+			return pos, errors.New("-A requires an alias")
 		} else if strings.HasPrefix(args[pos], "-A") {
 			all.Clj.ReplAliases += strings.TrimPrefix(args[pos], "-A")
 		} else if args[pos] == "-M" {
