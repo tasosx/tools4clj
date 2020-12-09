@@ -429,10 +429,7 @@ func use(options *allOpts) error {
 		}
 		fmt.Println(argsDescription(pathVector, tools4CljDir, configDir, cacheDir, &config, options))
 	} else if options.Clj.Tree {
-		err := start(printTreeCmd(&config, toolsCp))
-		if err != nil {
-			return err
-		}
+		return nil
 	} else if options.Clj.Trace {
 		fmt.Fprintln(os.Stderr, "Wrote trace.edn")
 	} else if options.Mode == "exec" {
@@ -495,7 +492,7 @@ func checksumOf(options *allOpts, configPaths []string) string {
 
 func isStale(options *allOpts, config t4cConfig, configPaths []string) (bool, error) {
 	stale := false
-	if options.Clj.Force || options.Clj.Trace || options.Clj.Prep || !fileExists(config.cpFile) {
+	if options.Clj.Force || options.Clj.Trace || options.Clj.Tree || options.Clj.Prep || !fileExists(config.cpFile) {
 		stale = true
 	} else {
 		for _, path := range configPaths {
@@ -540,6 +537,9 @@ func buildToolsArgs(config *t4cConfig, stale bool, options *allOpts) {
 			config.toolsArgs = append(config.toolsArgs, "--threads")
 			config.toolsArgs = append(config.toolsArgs, strconv.Itoa(options.Clj.Threads))
 		}
+		if options.Clj.Tree {
+			config.toolsArgs = append(config.toolsArgs, "--tree")
+		}
 		if options.Clj.Trace {
 			config.toolsArgs = append(config.toolsArgs, "--trace")
 		}
@@ -557,7 +557,11 @@ func activeClassPath(options *allOpts, config t4cConfig) (string, error) {
 		if err != nil {
 			return "", err
 		}
-		cp = string(b)
+		if len(b) > 2048 {
+			cp = "@" + config.cpFile
+		} else {
+			cp = string(b)
+		}
 	}
 	return cp, nil
 }

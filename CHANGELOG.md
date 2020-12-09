@@ -6,6 +6,10 @@ https://github.com/clojure/brew-install/blob/1.10.1/CHANGELOG.md
 
 ## Releases
 
+- Nineteenth release [2020-12-09]
+    - Based on clojure tools v.1.10.1.754
+    - Bypasses operating systems command line length limits
+
 - Eighteenth release [2020-11-24]
     - Based on clojure tools v.1.10.1.739
     

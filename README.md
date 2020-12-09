@@ -4,7 +4,7 @@
 In the shadows of the official clojure tools:
 
 ```
-const version = "1.10.1.739"
+const version = "1.10.1.754"
 ```
 
 
@@ -30,7 +30,8 @@ For a Go user:
 - An easy entrance to clojure world. If you are a go user you are one command line away from clojured happiness.
 
 For a Windows user:
-- Resolve Windows (powershell/cmd/bash) quotes handling differences. One clojure/clj tools command to run anywhere. So pick a published deps clj/clojure command line example on the internet and run it on Windows, with no need to change/escape the quotes.
+- Resolves Windows (powershell/cmd/bash) quotes handling differences. One clojure/clj tools command to run anywhere. So pick a published deps clj/clojure command line example on the internet and run it on Windows, with no need to change/escape the quotes.
+- Bypasses operating systems command line length limits, frequently reached (on Windows) when large classpaths are defined, using a java command line argument file in place of the classpath value.
 
 For any user:
 - Same update procedure to all supported platforms.

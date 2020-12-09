@@ -18,6 +18,7 @@ import (
 	"os"
 	"runtime"
 	"strconv"
+	"strings"
 	"testing"
 	"time"
 )
@@ -1296,22 +1297,60 @@ func TestBuildToolsArgs(t *testing.T) {
 	if len(config.toolsArgs) != len(expected) || args != expectedArgs {
 		t.Errorf("buildToolsArgs failed, expected %v, got %v", expected, config.toolsArgs)
 	}
+
+	// toolsArgs changed when: Clj.Tree == true, stale == true
+	options.Clj.Tree = true
+	config.toolsArgs = []string{"not_changed"}
+	stale = true
+	expected = []string{
+		"--config-data",
+		`{:deps {clansi {:mvn/version "1.0.0"}}}`,
+		"-R:argR",
+		"-C:argC",
+		"-M:argM",
+		"-A:argA",
+		"-X:argX",
+		"--skip-cp",
+		"--threads",
+		"42",
+		"--tree",
+		"--trace",
+	}
+
+	buildToolsArgs(&config, stale, &options)
+	args = fmt.Sprintf("%+v", config.toolsArgs)
+	expectedArgs = fmt.Sprintf("%+v", expected)
+	if len(config.toolsArgs) != len(expected) || args != expectedArgs {
+		t.Errorf("buildToolsArgs failed, expected %v, got %v", expected, config.toolsArgs)
+	}
 }
 
 func TestActiveClassPath(t *testing.T) {
 	options := allOpts{}
 	config := t4cConfig{}
 
-	// file to use
-	cpFile := "classpathFile.edn"
+	// files to use
+	cpFile := "cpfile.cp"
+	cpFileContent := "Hello"
+	cpFileLarge := "cpfile_large.cp"
+	cpFileLargeContent := strings.Repeat("Clojure", 1+2048/len("Clojure"))
 
 	// create cp file
-	err := ioutil.WriteFile(cpFile, []byte("Hello"), 0755)
+	err := ioutil.WriteFile(cpFile, []byte(cpFileContent), 0755)
 	if err != nil {
 		t.Errorf("unable to write file: %v", err)
 		t.FailNow()
 	} else {
 		defer os.Remove(cpFile)
+	}
+
+	// create large cp file (>2048 bytes)
+	err = ioutil.WriteFile(cpFileLarge, []byte(cpFileLargeContent), 0755)
+	if err != nil {
+		t.Errorf("unable to write large file: %v", err)
+		t.FailNow()
+	} else {
+		defer os.Remove(cpFileLarge)
 	}
 
 	// no options defined, no class path file
@@ -1321,7 +1360,7 @@ func TestActiveClassPath(t *testing.T) {
 	}
 
 	// no options defined, not existing class path file
-	config.cpFile = "notexisting_cpfile.edn"
+	config.cpFile = "notexisting_cpfile.cp"
 	res, err = activeClassPath(&options, config)
 	if err == nil {
 		t.Error("expecting file open error")
@@ -1329,7 +1368,7 @@ func TestActiveClassPath(t *testing.T) {
 
 	// no options defined, existing class path file
 	config.cpFile = cpFile
-	expected := "Hello"
+	expected := cpFileContent
 
 	res, err = activeClassPath(&options, config)
 	if err != nil {
@@ -1339,7 +1378,19 @@ func TestActiveClassPath(t *testing.T) {
 		t.Errorf("activeClassPath failed, expected %v, got %v", "", res)
 	}
 
-	// Dep.Describe == true, existing class path file
+	// no options defined, existing class path large file
+	config.cpFile = cpFileLarge
+	expected = "@" + cpFileLarge
+
+	res, err = activeClassPath(&options, config)
+	if err != nil {
+		t.Errorf("activeClassPath failed, with error: %v", err)
+	}
+	if res != expected {
+		t.Errorf("activeClassPath failed, expected %v, got %v", "", res)
+	}
+
+	// Clj.Describe == true and Clj.ForceCP is set, existing class path file
 	options.Clj.Describe = true
 	options.Clj.ForceCP = "forced_cp"
 	config.cpFile = cpFile
@@ -1353,7 +1404,7 @@ func TestActiveClassPath(t *testing.T) {
 		t.Errorf("activeClassPath failed, expected %v, got %v", "", res)
 	}
 
-	// Dep.ForceCP == false and Dep.ForceCP is set, existing class path file
+	// Clj.Describe == false and Clj.ForceCP is set, existing class path file
 	options.Clj.Describe = false
 	options.Clj.ForceCP = "forced_cp"
 	config.cpFile = cpFile

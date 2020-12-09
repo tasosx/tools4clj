@@ -70,32 +70,48 @@ func TestMakeClassPathCmd(t *testing.T) {
 	}
 }
 
-func TestPrintTreeCmd(t *testing.T) {
+func TestGeneratePomCmd(t *testing.T) {
 	toolsCpDir := "test-cpTools-dir"
 
 	conf := t4cConfig{
-		libsFile: "test-libs-file",
+		configUser:    "test-config-user",
+		configProject: "test-config-project",
+		libsFile:      "test-libs-file",
+		cpFile:        "test-cp-file",
+		jvmFile:       "test-jvm-file",
+		mainFile:      "test-main-file",
+		toolsArgs: []string{
+			"arg1",
+			"arg2",
+			"arg3",
+			"",
+			"",
+		},
 	}
 
-	cmd := printTreeCmd(&conf, toolsCpDir)
+	cmd := generatePomCmd(&conf, toolsCpDir)
 
 	// test args
 	{
 		expected := []string{
 			javaPath, "-classpath", toolsCpDir,
 			"clojure.main",
-			"-m", "clojure.tools.deps.alpha.script.print-tree",
-			"--libs-file", conf.libsFile,
+			"-m", "clojure.tools.deps.alpha.script.generate-manifest2",
+			"--config-user", conf.configUser,
+			"--config-project", conf.configProject,
+			"--gen=pom",
 		}
+		expected = append(expected, conf.toolsArgs...)
+		expected = removeEmpty(expected)
 
 		if len(cmd.Args) != len(expected) {
-			t.Errorf("printTreeCmd failed, args expected %v, got %v", len(expected), len(cmd.Args))
+			t.Errorf("generatePomCmd failed, args expected %v, got %v", len(expected), len(cmd.Args))
 			t.FailNow()
 		}
 
 		for i, v := range cmd.Args {
 			if v != expected[i] {
-				t.Errorf("printTreeCmd failed, arg expected %v, got %v", expected[i], v)
+				t.Errorf("generatePomCmd failed, arg expected %v, got %v", expected[i], v)
 			}
 		}
 	}

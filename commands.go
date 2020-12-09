@@ -56,14 +56,6 @@ func generatePomCmd(conf *t4cConfig, toolsClassPath string) exec.Cmd {
 	return *cmd
 }
 
-func printTreeCmd(conf *t4cConfig, toolsClassPath string) exec.Cmd {
-	var cmd = exec.Command(javaPath, "-classpath", toolsClassPath,
-		"clojure.main",
-		"-m", "clojure.tools.deps.alpha.script.print-tree",
-		"--libs-file", conf.libsFile)
-
-	return *cmd
-}
 func clojureExecuteCmd(jvmCacheOpts []string, jvmOpts []string, basisFile string,
 	execJarPath string, cp string, execAliases string, args []string) exec.Cmd {
 
