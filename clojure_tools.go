@@ -50,15 +50,15 @@ in a terminal, and should be preferred unless you don't want that support,
 then use 'clojure'.
 
 Usage:
-  Start a REPL   clj     [t4c-opt*] [clj-opt*] [-A:aliases] [init-opt*]
-  Exec function  clojure [t4c-opt*] [clj-opt*] -X[:aliases] [a/fn] [kpath v]*
-  Run main       clojure [t4c-opt*] [clj-opt*] -M[:aliases] [init-opt*] [main-opt] [arg*]
+  Start a REPL   clj     [t4c-opt*] [clj-opt*] [-Aaliases] [init-opt*]
+  Exec function  clojure [t4c-opt*] [clj-opt*] -X[aliases] [a/fn] [kpath v]*
+  Run main       clojure [t4c-opt*] [clj-opt*] -M[aliases] [init-opt*] [main-opt] [arg*]
   Prepare        clojure [t4c-opt*] [clj-opt*] -P [other exec opts]
 
 exec-opts:
-  -A:aliases     Use aliases to modify classpath
-  -X[:aliases]   Use aliases to modify classpath or supply exec fn/args
-  -M[:aliases]   Use aliases to modify classpath or supply main opts
+  -Aaliases     Use concatenated aliases to modify classpath
+  -X[aliases]   Use concatenated aliases to modify classpath or supply exec fn/args
+  -M[aliases]   Use concatenated aliases to modify classpath or supply main opts
   -P             Prepare deps - download libs, cache classpath, but don't exec
 
 clj-opts:
@@ -107,7 +107,7 @@ For more info, see:
 `
 
 const (
-	version        = "1.10.1.754"
+	version        = "1.10.1.763"
 	depsEDN        = "deps.edn"
 	exampleDepsEDN = "example-deps.edn"
 	toolsTarGz     = "clojure-tools-" + version + ".tar.gz"
