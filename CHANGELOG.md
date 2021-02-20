@@ -6,6 +6,9 @@ https://github.com/clojure/brew-install/blob/1.10.1/CHANGELOG.md
 
 ## Releases
 
+- Twenty-second release [2021-02-20]
+    - Based on clojure tools v.1.10.2.790
+
 - Twenty-first release [2021-01-27]
     - Based on clojure tools v.1.10.2.774
 

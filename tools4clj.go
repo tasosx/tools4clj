@@ -61,10 +61,12 @@ func runClojure(osArgs []string, cljRun bool) {
 	var opts allOpts
 
 	// read and set command line options
-	err = read(&opts, osArgs, cljRun)
+	exit, err := read(&opts, osArgs, cljRun)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
+	} else if exit {
+		os.Exit(0)
 	}
 
 	if opts.Main.Help {

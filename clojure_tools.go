@@ -75,6 +75,8 @@ clj-opts:
   -Sthreads N    Set specific number of download threads
   -Strace        Write a trace.edn file that traces deps expansion
   --             Stop parsing dep options and pass remaining arguments to clojure.main
+  -version       Print the version to stderr and exit
+  --version      Print the version to stdout and exit
 
 init-opt:
   -i, --init path     Load a file or resource
@@ -107,7 +109,7 @@ For more info, see:
 `
 
 const (
-	version        = "1.10.2.774"
+	version        = "1.10.2.790"
 	depsEDN        = "deps.edn"
 	exampleDepsEDN = "example-deps.edn"
 	toolsTarGz     = "clojure-tools-" + version + ".tar.gz"
@@ -158,6 +160,11 @@ func getTools4CljPath() (string, error) {
 }
 
 func getJavaPath() (string, error) {
+	env, found := os.LookupEnv("JAVA_CMD")
+	if found {
+		return env, nil
+	}
+
 	var p = exec.Command("java").Path
 	if p == "" {
 		env, found := os.LookupEnv("JAVA_HOME")

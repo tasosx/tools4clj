@@ -969,6 +969,39 @@ var testInitItems = []TestReadItem{
 	},
 }
 
+var testVersionPrintItems = []TestReadItem{
+	{ // print version on stderr and exit
+		[]string{"clojure",
+			"-version",
+		},
+		allOpts{
+			Clj:        cljOpts{},
+			Init:       initOpts{},
+			Main:       mainOpts{},
+			Args:       []string{},
+			NativeArgs: true,
+			Rlwrap:     false,
+			Mode:       "repl",
+		},
+		"expected to exit",
+	},
+	{ // print version on stderr and exit
+		[]string{"clojure",
+			"--version",
+		},
+		allOpts{
+			Clj:        cljOpts{},
+			Init:       initOpts{},
+			Main:       mainOpts{},
+			Args:       []string{},
+			NativeArgs: true,
+			Rlwrap:     false,
+			Mode:       "repl",
+		},
+		"expected to exit",
+	},
+}
+
 func TestRead(t *testing.T) {
 	testItems := []TestReadItem{}
 	testItems = append(testItems, testT4CNativeArgsItems...)
@@ -976,6 +1009,7 @@ func TestRead(t *testing.T) {
 	testItems = append(testItems, testMainItems...)
 	testItems = append(testItems, testDepItems...)
 	testItems = append(testItems, testInitItems...)
+	testItems = append(testItems, testVersionPrintItems...)
 
 	for _, v := range testItems {
 		// on windows run only native args read test
@@ -993,10 +1027,14 @@ func TestRead(t *testing.T) {
 		if len(v.inputArgs) > 0 && v.inputArgs[0] == "clj" {
 			clj = true
 		}
-		err := read(&opts, v.inputArgs, clj)
+		exit, err := read(&opts, v.inputArgs, clj)
 		if err != nil {
 			if v.errorExpected == "" || v.errorExpected != err.Error() {
 				t.Errorf("could not read args %v, error: %v", v.inputArgs, err)
+			}
+		} else if exit {
+			if v.errorExpected != "expected to exit" {
+				t.Errorf("could not exit after: %v", v.inputArgs)
 			}
 		} else {
 			readOpts := fmt.Sprintf("%+v", opts)

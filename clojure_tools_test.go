@@ -76,6 +76,19 @@ func TestGetJavaPath(t *testing.T) {
 	}
 }
 
+func TestGetOverridenJavaPath(t *testing.T) {
+	overridesJava := "overrides_java"
+	os.Setenv("JAVA_CMD", overridesJava)
+
+	javaPath, err := getJavaPath()
+	if err != nil {
+		t.Errorf("failed to get java path: %v", err)
+	}
+	if javaPath != overridesJava {
+		t.Errorf("overriding java path failed: %v", javaPath)
+	}
+}
+
 func TestGetToolsCp(t *testing.T) {
 	dir := ""
 	toolsCp, err := getToolsCp(dir)

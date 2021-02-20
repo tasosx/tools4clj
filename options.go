@@ -68,51 +68,53 @@ type mainOpts struct {
 	HelpArg  string
 }
 
-func read(all *allOpts, args []string, cljRun bool) error {
+func read(all *allOpts, args []string, cljRun bool) (bool, error) {
 	if len(args) == 0 {
-		return errors.New("missing application argument (0)")
+		return false, errors.New("missing application argument (0)")
 	}
 
 	var i = 1
 
 	i, err := setT4COpts(all, args, i, cljRun)
 	if err != nil {
-		return err
+		return false, err
 	}
 
 	// resolve "linuxized" windows command line args
 	args, err = linuxize(args, all.NativeArgs)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
+		return true, nil
 	}
 
 	i, err = setCljOpts(all, args, i)
 	if err != nil {
-		return err
+		return false, err
+	} else if i < 0 {
+		return true, nil
 	}
 
 	i, err = setInitOpts(all, args, i)
 	if err != nil {
-		return err
+		return false, err
 	}
 
 	i, err = setMainOpts(all, args, i)
 	if err != nil {
-		return err
+		return false, err
 	}
 
 	if all.Main.Help && (len(all.Clj.MainAliases) > 0 || len(all.Clj.ReplAliases) > 0) {
 		all.Main.Help = false
 		all.Args = append(all.Args, all.Main.HelpArg)
-		return nil
+		return false, nil
 	}
 
 	if i < len(args) {
 		all.Args = append(all.Args, args[i:]...)
 	}
 
-	return nil
+	return false, nil
 }
 
 func setT4COpts(all *allOpts, args []string, pos int, cljRun bool) (int, error) {
@@ -158,7 +160,13 @@ func setCljOpts(all *allOpts, args []string, pos int) (int, error) {
 			break
 		}
 
-		if strings.HasPrefix(args[pos], "-J") {
+		if args[pos] == "-version" {
+			fmt.Fprintln(os.Stderr, "Clojure CLI version "+version)
+			return -1, nil
+		} else if args[pos] == "--version" {
+			fmt.Fprintln(os.Stdout, "Clojure CLI version "+version)
+			return -1, nil
+		} else if strings.HasPrefix(args[pos], "-J") {
 			all.Clj.JvmOpts = append(all.Clj.JvmOpts, strings.TrimPrefix(args[pos], "-J"))
 		} else if strings.HasPrefix(args[pos], "-R") {
 			all.Clj.ResolveAliases += strings.TrimPrefix(args[pos], "-R")
@@ -601,7 +609,7 @@ func getCacheOpts(file string) ([]string, error) {
 		if err != nil {
 			return []string{}, err
 		}
-		cacheOpts = strings.Split(string(b), " ")
+		cacheOpts = strings.Split(string(b), "\n")
 	}
 	return cacheOpts, nil
 }
