@@ -30,7 +30,7 @@ func TestLinuxize(t *testing.T) {
 			if err != nil {
 				t.Error("failed to get native args on a windows platform")
 			}
-			if res == nil || len(res) == 0 {
+			if len(res) == 0 {
 				t.Error("no args returned")
 			}
 			for i, v := range res {
@@ -44,7 +44,7 @@ func TestLinuxize(t *testing.T) {
 			if err != nil {
 				t.Error("failed to linuxize args on a windows platform using WMI")
 			}
-			if res == nil || len(res) == 0 {
+			if len(res) == 0 {
 				t.Error("no args returned")
 			}
 			for i, v := range res {
@@ -59,7 +59,7 @@ func TestLinuxize(t *testing.T) {
 			if err != nil {
 				t.Error("failed to get native args on a Windows platform")
 			}
-			if res == nil || len(res) == 0 {
+			if len(res) == 0 {
 				t.Error("no args returned")
 			}
 			for i, v := range res {
@@ -83,14 +83,14 @@ func TestWindowsArgs(t *testing.T) {
 		if err == nil {
 			t.Error("no error getting windows cmd args on a non windows platform [which is really creepy...]")
 		}
-		if res != nil && len(res) > 0 {
+		if len(res) > 0 {
 			t.Error("some windows args returned [really, really creepy...]")
 		}
 	} else {
 		if err != nil {
 			t.Error("error getting windows cmd args using wmi")
 		}
-		if res == nil || len(res) == 0 {
+		if len(res) == 0 {
 			t.Error("no windows args returned")
 		}
 	}

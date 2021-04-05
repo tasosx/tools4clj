@@ -290,11 +290,10 @@ func TestClojureCmd(t *testing.T) {
 	cmd := clojureCmd(jvmCacheOpts, jvmOpts, conf.libsFile, conf.basisFile,
 		cp, mainCacheOpts, clojureArgs, false)
 
-	expected := []string{}
+	expected := []string{javaPath}
 
 	// test clojure args
 	{
-		expected = []string{javaPath}
 		expected = append(expected, jvmCacheOpts...)
 		expected = append(expected, jvmOpts...)
 		expected = append(expected, "-Dclojure.libfile="+conf.libsFile, "-Dclojure.basisfile="+conf.basisFile, "-classpath", cp, "clojure.main")

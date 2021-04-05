@@ -714,7 +714,7 @@ var testDepItems = []TestReadItem{
 			Rlwrap:     false,
 			Mode:       "repl",
 		},
-		"Option changed, use: clj -X:deps git-resolve-tags",
+		"option changed, use: clj -X:deps git-resolve-tags",
 	},
 	{ // not supported: -A without an alias
 		[]string{"clojure",
@@ -1090,7 +1090,6 @@ func TestChecksumOf(t *testing.T) {
 func TestIsStale(t *testing.T) {
 	options := allOpts{}
 	config := t4cConfig{}
-	configPaths := []string{}
 
 	// files to use
 	olderFile := "older_filepath.edn"
@@ -1133,7 +1132,7 @@ func TestIsStale(t *testing.T) {
 	options.Clj.Force = true
 	options.Clj.Trace = false
 	config.cpFile = cpFile
-	configPaths = []string{newerFile}
+	configPaths := []string{newerFile}
 	// output
 	expected := true
 
@@ -1396,12 +1395,18 @@ func TestActiveClassPath(t *testing.T) {
 	if err == nil {
 		t.Error("expecting file open error")
 	}
+	if res != "" {
+		t.Error("not expecting a class path")
+	}
 
 	// no options defined, not existing class path file
 	config.cpFile = "notexisting_cpfile.cp"
 	res, err = activeClassPath(&options, config)
 	if err == nil {
 		t.Error("expecting file open error")
+	}
+	if res != "" {
+		t.Error("not expecting a class path")
 	}
 
 	// no options defined, existing class path file

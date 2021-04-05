@@ -95,6 +95,9 @@ func TestGetToolsCp(t *testing.T) {
 	if err == nil {
 		t.Errorf("expected to get an error for empty tools jar path")
 	}
+	if toolsCp != "" {
+		t.Errorf("not empty tools class path")
+	}
 
 	dir = "test-tools4clj-dir"
 
@@ -113,6 +116,9 @@ func TestGetExecJarPath(t *testing.T) {
 	execCp, err := getExecCp(dir)
 	if err == nil {
 		t.Errorf("expected to get an error for empty exec jar path")
+	}
+	if execCp != "" {
+		t.Errorf("not empty exec jar path")
 	}
 
 	dir = "test-tools4clj-dir"

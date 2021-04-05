@@ -128,10 +128,10 @@ func setT4COpts(all *allOpts, args []string, pos int, cljRun bool) (int, error) 
 		}
 
 		if args[pos] == "--rebel" {
-			if cljRun == false {
+			if !cljRun {
 				return pos, errors.New("readline option " + args[pos] + " can only be used with clj")
 			}
-			if rebel == true {
+			if rebel {
 				return pos, errors.New("readline option " + args[pos] + " defined more than one time")
 			}
 
@@ -235,7 +235,7 @@ func setCljOpts(all *allOpts, args []string, pos int) (int, error) {
 		} else if args[pos] == "-Stree" {
 			all.Clj.Tree = true
 		} else if args[pos] == "-Sresolve-tags" {
-			return pos, errors.New("Option changed, use: clj -X:deps git-resolve-tags")
+			return pos, errors.New("option changed, use: clj -X:deps git-resolve-tags")
 		} else if args[pos] == "-Sverbose" {
 			all.Clj.Verbose = true
 		} else if args[pos] == "-Sdescribe" {
@@ -320,29 +320,49 @@ func setInitOpts(all *allOpts, args []string, pos int) (int, error) {
 }
 
 func setMainOpts(all *allOpts, args []string, pos int) (int, error) {
-	for {
-		if pos >= len(args) {
-			break
-		}
+	if pos >= len(args) {
+		return pos, nil
+	}
 
-		if args[pos] == "-m" || args[pos] == "--main" {
-			if pos+1 > len(args)-1 {
-				return pos, errors.New("main ns-name not defined for " + args[pos] + " option")
-			}
-			pos++
-			all.Main.MainArgs = append(all.Main.MainArgs, "-m", args[pos])
-		} else if args[pos] == "-r" || args[pos] == "--repl" {
-			all.Main.Repl = true
-		} else if args[pos] == "-h" || args[pos] == "-?" || args[pos] == "--help" {
-			all.Main.Help = true
-			all.Main.HelpArg = args[pos]
-		} else {
-			// move to the next options group
-			break
+	if args[pos] == "-m" || args[pos] == "--main" {
+		if pos+1 > len(args)-1 {
+			return pos, errors.New("main ns-name not defined for " + args[pos] + " option")
 		}
 		pos++
-		break
+		all.Main.MainArgs = append(all.Main.MainArgs, "-m", args[pos])
+		pos++
+	} else if args[pos] == "-r" || args[pos] == "--repl" {
+		all.Main.Repl = true
+		pos++
+	} else if args[pos] == "-h" || args[pos] == "-?" || args[pos] == "--help" {
+		all.Main.Help = true
+		all.Main.HelpArg = args[pos]
+		pos++
 	}
+
+	// for {
+	// 	if pos >= len(args) {
+	// 		break
+	// 	}
+
+	// 	if args[pos] == "-m" || args[pos] == "--main" {
+	// 		if pos+1 > len(args)-1 {
+	// 			return pos, errors.New("main ns-name not defined for " + args[pos] + " option")
+	// 		}
+	// 		pos++
+	// 		all.Main.MainArgs = append(all.Main.MainArgs, "-m", args[pos])
+	// 	} else if args[pos] == "-r" || args[pos] == "--repl" {
+	// 		all.Main.Repl = true
+	// 	} else if args[pos] == "-h" || args[pos] == "-?" || args[pos] == "--help" {
+	// 		all.Main.Help = true
+	// 		all.Main.HelpArg = args[pos]
+	// 	} else {
+	// 		// move to the next options group
+	// 		break
+	// 	}
+	// 	pos++
+	// 	break
+	// }
 
 	return pos, nil
 }

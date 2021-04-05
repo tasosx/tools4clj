@@ -109,7 +109,7 @@ For more info, see:
 `
 
 const (
-	version        = "1.10.3.814"
+	version        = "1.10.3.822"
 	depsEDN        = "deps.edn"
 	exampleDepsEDN = "example-deps.edn"
 	toolsTarGz     = "clojure-tools-" + version + ".tar.gz"
@@ -245,13 +245,11 @@ func getClojureTools(toolsDir string) error {
 }
 
 func getConfigPaths(conf *t4cConfig, configDir string, toolsDir string, repro bool) []string {
-	configPaths := []string{}
+	configPaths := []string{path.Join(toolsDir, "deps.edn"), "deps.edn"}
 	configUser := ""
-	if repro {
-		configPaths = []string{path.Join(toolsDir, "deps.edn"), "deps.edn"}
-	} else {
-		configUser = path.Join(configDir, "deps.edn")
+	if !repro {
 		configPaths = []string{path.Join(toolsDir, "deps.edn"), path.Join(configDir, "deps.edn"), "deps.edn"}
+		configUser = path.Join(configDir, "deps.edn")
 	}
 	conf.configUser = configUser
 
