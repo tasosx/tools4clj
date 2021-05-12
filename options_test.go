@@ -380,7 +380,7 @@ var testDepItems = []TestReadItem{
 				JvmOpts:          []string{"argJ"},
 				ResolveAliases:   ":argR",
 				ClassPathAliases: ":argC",
-				ReplAliases:      ":argA",
+				ReplAliases:      []string{":argA"},
 				DepsData:         `{:deps {clansi {:mvn/version "1.0.0"}}}`,
 				PrintClassPath:   true,
 				ForceCP:          `src:target:/classpath`,
@@ -415,7 +415,7 @@ var testDepItems = []TestReadItem{
 				JvmOpts:          []string{"argJ1", "argJ2"},
 				ResolveAliases:   ":argR1:argR2",
 				ClassPathAliases: ":argC1:argC2",
-				ReplAliases:      ":argA1:argA2",
+				ReplAliases:      []string{":argA1", ":argA2"},
 				MainAliases:      ":argM1",
 			},
 			Init:       initOpts{},
@@ -550,7 +550,7 @@ var testDepItems = []TestReadItem{
 		},
 		allOpts{
 			Clj: cljOpts{
-				ReplAliases: ":argA1",
+				ReplAliases: []string{":argA1"},
 			},
 			Init:       initOpts{},
 			Main:       mainOpts{},
@@ -606,7 +606,7 @@ var testDepItems = []TestReadItem{
 		},
 		allOpts{
 			Clj: cljOpts{
-				ReplAliases: ":argA",
+				ReplAliases: []string{":argA"},
 			},
 			Init: initOpts{},
 			Main: mainOpts{
@@ -1050,7 +1050,7 @@ func TestChecksumOf(t *testing.T) {
 	// input
 	options := allOpts{
 		Clj: cljOpts{
-			ReplAliases: ":argA",
+			ReplAliases: []string{":argA"},
 			MainAliases: ":argM",
 			DepsData:    `{:deps {clansi {:mvn/version "1.0.0"}}}`,
 		},
@@ -1261,7 +1261,7 @@ func TestBuildToolsArgs(t *testing.T) {
 			ResolveAliases:   ":argR",
 			ClassPathAliases: ":argC",
 			MainAliases:      ":argM",
-			ReplAliases:      ":argA",
+			ReplAliases:      []string{":argA"},
 			ExecAliases:      ":argX",
 			ForceCP:          "forced-class-path",
 			Pom:              false,
@@ -1479,7 +1479,7 @@ func TestArgsDescription(t *testing.T) {
 			ResolveAliases:   ":argR",
 			ClassPathAliases: ":argC",
 			MainAliases:      ":argM",
-			ReplAliases:      ":argA",
+			ReplAliases:      []string{":argA"},
 		},
 	}
 	// output
@@ -1493,7 +1493,7 @@ func TestArgsDescription(t *testing.T) {
  :force ` + strconv.FormatBool(options.Clj.Force) + `
  :repro ` + strconv.FormatBool(options.Clj.Repro) + `
  :main-aliases "` + options.Clj.MainAliases + `"
- :repl-aliases "` + options.Clj.ReplAliases + `"}`
+ :repl-aliases "` + join(options.Clj.ReplAliases, " ") + `"}`
 
 	res := argsDescription(pathVector, toolsDir, configDir, cacheDir, &config, &options)
 	if res != expected {

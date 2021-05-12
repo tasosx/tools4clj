@@ -38,7 +38,7 @@ type cljOpts struct {
 	MainAliases      string
 	ResolveAliases   string
 	ClassPathAliases string
-	ReplAliases      string
+	ReplAliases      []string
 	ExecAliases      string
 	DepsData         string
 	PrintClassPath   bool
@@ -181,7 +181,7 @@ func setCljOpts(all *allOpts, args []string, pos int) (int, error) {
 		} else if args[pos] == "-A" {
 			return pos, errors.New("-A requires an alias")
 		} else if strings.HasPrefix(args[pos], "-A") {
-			all.Clj.ReplAliases += strings.TrimPrefix(args[pos], "-A")
+			all.Clj.ReplAliases = append(all.Clj.ReplAliases, strings.TrimPrefix(args[pos], "-A"))
 		} else if args[pos] == "-M" {
 			all.Mode = "main"
 			// move to the next options group
@@ -472,7 +472,7 @@ func use(options *allOpts) error {
 		}
 	} else {
 		if options.Mode == "repl" {
-			fmt.Fprintln(os.Stderr, "WARNING: When invoking clojure.main, use -M")
+			fmt.Fprintln(os.Stderr, "WARNING: Use of -A with clojure.main is deprecated, use -M instead")
 		}
 		jvmCacheOpts, err := getCacheOpts(config.jvmFile)
 		if err != nil {
@@ -503,7 +503,7 @@ func checksumOf(options *allOpts, configPaths []string) string {
 	prep := join([]string{
 		options.Clj.ResolveAliases,
 		options.Clj.ClassPathAliases,
-		options.Clj.ReplAliases,
+		join(options.Clj.ReplAliases, ""),
 		options.Clj.ExecAliases,
 		options.Clj.MainAliases,
 		options.Clj.DepsData}, "|")
@@ -553,7 +553,7 @@ func buildToolsArgs(config *t4cConfig, stale bool, options *allOpts) {
 			config.toolsArgs = append(config.toolsArgs, "-M"+options.Clj.MainAliases)
 		}
 		if len(options.Clj.ReplAliases) > 0 {
-			config.toolsArgs = append(config.toolsArgs, "-A"+options.Clj.ReplAliases)
+			config.toolsArgs = append(config.toolsArgs, "-A"+join(options.Clj.ReplAliases, ""))
 		}
 		if len(options.Clj.ExecAliases) > 0 {
 			config.toolsArgs = append(config.toolsArgs, "-X"+options.Clj.ExecAliases)
@@ -605,7 +605,7 @@ func argsDescription(pathVector string, toolsDir string, configDir string, cache
  :force ` + strconv.FormatBool(options.Clj.Force) + `
  :repro ` + strconv.FormatBool(options.Clj.Repro) + `
  :main-aliases "` + options.Clj.MainAliases + `"
- :repl-aliases "` + options.Clj.ReplAliases + `"}`
+ :repl-aliases "` + join(options.Clj.ReplAliases, " ") + `"}`
 }
 
 func getInitArgs(options *allOpts) []string {
