@@ -109,7 +109,7 @@ For more info, see:
 `
 
 const (
-	version        = "1.10.3.849"
+	version        = "1.10.3.855"
 	depsEDN        = "deps.edn"
 	exampleDepsEDN = "example-deps.edn"
 	toolsTarGz     = "clojure-tools-" + version + ".tar.gz"
