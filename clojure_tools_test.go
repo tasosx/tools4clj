@@ -105,7 +105,7 @@ func TestGetToolsCp(t *testing.T) {
 	if err != nil {
 		t.Errorf("failed to get tools class path: %v", err)
 	}
-	expected := path.Join(dir, toolsJar)
+	expected := path.Join(dir, libexecDir, toolsJar)
 	if toolsCp != expected {
 		t.Errorf("failed getting tools class path, expected %v, got %v", expected, toolsCp)
 	}
@@ -127,7 +127,7 @@ func TestGetExecJarPath(t *testing.T) {
 	if err != nil {
 		t.Errorf("failed to get exec jar path: %v", err)
 	}
-	expected := path.Join(dir, execJar)
+	expected := path.Join(dir, libexecDir, execJar)
 	if execCp != expected {
 		t.Errorf("failed getting exec jar path, expected %v, got %v", expected, execCp)
 	}
@@ -179,8 +179,22 @@ func TestCopyExampleDeps(t *testing.T) {
 	defer os.Remove(dir)
 	defer os.Remove(path.Join(dir, depsEDN))
 
-	err := copyExampleDeps(dir, toolsDir)
+	err := copyExampleDepsEdn(dir, toolsDir)
 	if err != nil {
 		t.Errorf("failed to copy example deps: %v", err)
+	}
+}
+
+func TestCopyToolsEdn(t *testing.T) {
+	toolsDir := "testdata"
+	dir := "test-dest-dir"
+
+	os.Mkdir(dir, os.ModePerm)
+	defer os.Remove(dir)
+	defer os.Remove(path.Join(dir, cljToolsEDN))
+
+	err := copyToolsEdn(dir, toolsDir)
+	if err != nil {
+		t.Errorf("failed to copy tools edn: %v", err)
 	}
 }

@@ -18,6 +18,7 @@ import (
 	"hash/crc32"
 	"io/ioutil"
 	"os"
+	"path"
 	"runtime"
 	"strconv"
 	"strings"
@@ -39,6 +40,8 @@ type cljOpts struct {
 	ResolveAliases   string
 	ClassPathAliases string
 	ReplAliases      []string
+	ToolAliases      string
+	ToolName         string
 	ExecAliases      string
 	DepsData         string
 	PrintClassPath   bool
@@ -176,8 +179,6 @@ func setCljOpts(all *allOpts, args []string, pos int) (int, error) {
 			fmt.Fprintln(os.Stderr, "-C is deprecated, use -A with repl, -M for main, or -X for exec")
 		} else if strings.HasPrefix(args[pos], "-O") {
 			return pos, errors.New("-O is no longer supported, use -A with repl, -M for main, or -X for exec")
-		} else if strings.HasPrefix(args[pos], "-T") {
-			return pos, errors.New("-T is no longer supported, use -A with repl, -M for main, or -X for exec")
 		} else if args[pos] == "-A" {
 			return pos, errors.New("-A requires an alias")
 		} else if strings.HasPrefix(args[pos], "-A") {
@@ -202,6 +203,20 @@ func setCljOpts(all *allOpts, args []string, pos int) (int, error) {
 			all.Mode = "exec"
 			all.Clj.ExecAliases = strings.TrimPrefix(args[pos], "-X")
 			// move to the next options group
+			pos++
+			break
+		} else if strings.HasPrefix(args[pos], "-T:") {
+			all.Mode = "tool"
+			all.Clj.ToolAliases = strings.TrimPrefix(args[pos], "-T")
+			pos++
+			break
+		} else if args[pos] == "-T" {
+			all.Mode = "tool"
+			pos++
+			break
+		} else if strings.HasPrefix(args[pos], "-T") {
+			all.Mode = "tool"
+			all.Clj.ToolName = strings.TrimPrefix(args[pos], "-T")
 			pos++
 			break
 		} else if args[pos] == "-P" {
@@ -375,8 +390,18 @@ func use(options *allOpts) error {
 	}
 
 	// If user config directory does not exist, create it
-	// and copy there the example deps edn
-	err = copyExampleDeps(configDir, tools4CljDir)
+	// and copy there the example deps edn file
+	err = copyExampleDepsEdn(configDir, tools4CljDir)
+	if err != nil {
+		return err
+	}
+
+	// Determine user clj tools directory
+	cljToolsDir := getCljToolsDir(configDir)
+
+	// If clj tools directory does not exist, create it
+	// and copy there the tools edn file
+	err = copyToolsEdn(cljToolsDir, tools4CljDir)
 	if err != nil {
 		return err
 	}
@@ -460,19 +485,18 @@ func use(options *allOpts) error {
 		return nil
 	} else if options.Clj.Trace {
 		fmt.Fprintln(os.Stderr, "Wrote trace.edn")
-	} else if options.Mode == "exec" {
+	} else if options.Mode == "exec" || options.Mode == "tool" {
 		jvmCacheOpts, err := getCacheOpts(config.jvmFile)
 		if err != nil {
 			return err
 		}
-		err = safeStart(clojureExecuteCmd(jvmCacheOpts, options.Clj.JvmOpts,
-			config.basisFile, execCp, cp, options.Clj.ExecAliases, options.Args))
+		err = safeStart(clojureExecuteCmd(jvmCacheOpts, options.Clj.JvmOpts, config.basisFile, execCp, cp, options.Args))
 		if err != nil {
 			return err
 		}
 	} else {
-		if options.Mode == "repl" {
-			fmt.Fprintln(os.Stderr, "WARNING: Use of -A with clojure.main is deprecated, use -M instead")
+		if options.Mode == "repl" && len(options.Args) > 0 {
+			fmt.Fprintln(os.Stderr, "WARNING: Implicit use of clojure.main with options is deprecated, use -M")
 		}
 		jvmCacheOpts, err := getCacheOpts(config.jvmFile)
 		if err != nil {
@@ -506,7 +530,9 @@ func checksumOf(options *allOpts, configPaths []string) string {
 		join(options.Clj.ReplAliases, ""),
 		options.Clj.ExecAliases,
 		options.Clj.MainAliases,
-		options.Clj.DepsData}, "|")
+		options.Clj.DepsData,
+		options.Clj.ToolName,
+		options.Clj.ToolAliases}, "|")
 	for _, v := range configPaths {
 		if fileExists(v) {
 			prep += "|" + v
@@ -523,14 +549,30 @@ func isStale(options *allOpts, config t4cConfig, configPaths []string) (bool, er
 	if options.Clj.Force || options.Clj.Trace || options.Clj.Tree || options.Clj.Prep || !fileExists(config.cpFile) {
 		stale = true
 	} else {
-		for _, path := range configPaths {
-			newer, err := checkIsNewerFile(path, config.cpFile)
+		newer := false
+		if len(options.Clj.ToolName) > 0 {
+			configDir, err := getConfigDir()
 			if err != nil {
 				return false, err
 			}
-			if newer {
-				stale = true
-				break
+			cljToolsDir := getCljToolsDir(configDir)
+			newer, err = checkIsNewerFile(path.Join(cljToolsDir, options.Clj.ToolName+".edn"), config.cpFile)
+			if err != nil {
+				return false, err
+			}
+		}
+		if newer {
+			stale = true
+		} else {
+			for _, path := range configPaths {
+				newer, err := checkIsNewerFile(path, config.cpFile)
+				if err != nil {
+					return false, err
+				}
+				if newer {
+					stale = true
+					break
+				}
 			}
 		}
 	}
@@ -557,6 +599,15 @@ func buildToolsArgs(config *t4cConfig, stale bool, options *allOpts) {
 		}
 		if len(options.Clj.ExecAliases) > 0 {
 			config.toolsArgs = append(config.toolsArgs, "-X"+options.Clj.ExecAliases)
+		}
+		if options.Mode == "tool" {
+			config.toolsArgs = append(config.toolsArgs, "--tool-mode")
+		}
+		if len(options.Clj.ToolName) > 0 {
+			config.toolsArgs = append(config.toolsArgs, "--tool-name", options.Clj.ToolName)
+		}
+		if len(options.Clj.ToolAliases) > 0 {
+			config.toolsArgs = append(config.toolsArgs, "-T"+options.Clj.ToolAliases)
 		}
 		if len(options.Clj.ForceCP) > 0 {
 			config.toolsArgs = append(config.toolsArgs, "--skip-cp")
@@ -596,16 +647,23 @@ func activeClassPath(options *allOpts, config t4cConfig) (string, error) {
 
 func argsDescription(pathVector string, toolsDir string, configDir string, cacheDir string, config *t4cConfig, options *allOpts) string {
 	return `{:version "` + version + `"
- :config-files [` + pathVector + `]
- :config-user "` + config.configUser + `"
- :config-project "` + config.configProject + `"
- :install-dir "` + toolsDir + `"
- :config-dir "` + configDir + `"
- :cache-dir "` + cacheDir + `"
+ :config-files [` + escOnWindows(pathVector) + `]
+ :config-user "` + escOnWindows(config.configUser) + `"
+ :config-project "` + escOnWindows(config.configProject) + `"
+ :install-dir "` + escOnWindows(toolsDir) + `"
+ :config-dir "` + escOnWindows(configDir) + `"
+ :cache-dir "` + escOnWindows(cacheDir) + `"
  :force ` + strconv.FormatBool(options.Clj.Force) + `
  :repro ` + strconv.FormatBool(options.Clj.Repro) + `
  :main-aliases "` + options.Clj.MainAliases + `"
  :repl-aliases "` + join(options.Clj.ReplAliases, " ") + `"}`
+}
+
+func escOnWindows(path string) string {
+	if runtime.GOOS == "windows" {
+		path = strings.ReplaceAll(path, "\\", "\\\\")
+	}
+	return path
 }
 
 func getInitArgs(options *allOpts) []string {

@@ -4,7 +4,7 @@
 In the shadows of the official clojure tools:
 
 ```
-const version = "1.10.3.855"
+const version = "1.10.3.943"
 ```
 
 
@@ -48,7 +48,7 @@ If you need to override this behaviour, and want to use the native Windows argum
 
 ## Based upon...
 
-Tried to keep the usage of this project's produced binaries inline with the official CLI tools, with the exception of the installation directory. This project uses `~/.tools4clj/[version]` folder for the installation of `deps.edn`, `example-deps.edn`, `exec.jar` and `clojure-tools-X.Y.Z.jar` files, and the `%GOPATH%/bin` folder for the binaries.
+Tried to keep the usage of this project's produced binaries inline with the official CLI tools, with the exception of the installation directory. This project uses `~/.tools4clj/[version]` folder for the installation of `deps.edn`, `example-deps.edn`, `tools.edn`, `exec.jar` and `clojure-tools-X.Y.Z.jar` files, and the `%GOPATH%/bin` folder for the binaries.
 
 Check:
 - https://clojure.org/reference/deps_and_cli for a Deps and CLI detailed reference

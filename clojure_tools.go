@@ -51,14 +51,16 @@ then use 'clojure'.
 
 Usage:
   Start a REPL   clj     [t4c-opt*] [clj-opt*] [-Aaliases] [init-opt*]
-  Exec function  clojure [t4c-opt*] [clj-opt*] -X[aliases] [a/fn] [kpath v]*
+  Exec fn(s)     clojure [clj-opt*] -X[aliases] a/fn? [kpath v]* kv-map?
+  Run tool       clojure [clj-opt*] -T[name|aliases] a/fn [kpath v] kv-map?
   Run main       clojure [t4c-opt*] [clj-opt*] -M[aliases] [init-opt*] [main-opt] [arg*]
   Prepare        clojure [t4c-opt*] [clj-opt*] -P [other exec opts]
 
 exec-opts:
-  -Aaliases     Use concatenated aliases to modify classpath
-  -X[aliases]   Use concatenated aliases to modify classpath or supply exec fn/args
-  -M[aliases]   Use concatenated aliases to modify classpath or supply main opts
+  -Aaliases      Use concatenated aliases to modify classpath
+  -X[aliases]    Use concatenated aliases to modify classpath or supply exec fn/args
+  -T[name|aliases]  Invoke tool by name or via aliases ala -X
+  -M[aliases]    Use concatenated aliases to modify classpath or supply main opts
   -P             Prepare deps - download libs, cache classpath, but don't exec
 
 clj-opts:
@@ -93,6 +95,8 @@ main-opt:
 Programs provided by :deps alias:
   -X:deps mvn-install       Install a maven jar to the local repository cache
   -X:deps git-resolve-tags  Resolve git coord tags to shas and update deps.edn
+  -X:deps find-versions     Find available versions of a library
+  -X:deps prep              Prepare all unprepped libs in the dep tree
 
 ---
 
@@ -109,9 +113,10 @@ For more info, see:
 `
 
 const (
-	version        = "1.10.3.855"
+	version        = "1.10.3.943"
 	depsEDN        = "deps.edn"
 	exampleDepsEDN = "example-deps.edn"
+	cljToolsEDN    = "tools.edn"
 	toolsTarGz     = "clojure-tools-" + version + ".tar.gz"
 	toolsURL       = "https://download.clojure.org/install/" + toolsTarGz
 	toolsJar       = "clojure-tools-" + version + ".jar"
@@ -185,7 +190,7 @@ func getToolsCp(toolsDir string) (string, error) {
 		return "", errors.New("empty install dir")
 	}
 
-	return path.Join(toolsDir, toolsJar), nil
+	return path.Join(toolsDir, libexecDir, toolsJar), nil
 }
 
 func getExecCp(toolsDir string) (string, error) {
@@ -193,7 +198,7 @@ func getExecCp(toolsDir string) (string, error) {
 		return "", errors.New("empty install dir")
 	}
 
-	return path.Join(toolsDir, execJar), nil
+	return path.Join(toolsDir, libexecDir, execJar), nil
 }
 
 func getClojureTools(toolsDir string) error {
@@ -202,10 +207,17 @@ func getClojureTools(toolsDir string) error {
 		return err
 	}
 
-	if fileExists(path.Join(toolsDir, toolsJar)) &&
-		fileExists(path.Join(toolsDir, execJar)) &&
+	allDirs := path.Join(toolsDir, libexecDir)
+	err = os.MkdirAll(allDirs, os.ModePerm)
+	if err != nil {
+		return err
+	}
+
+	if fileExists(path.Join(toolsDir, libexecDir, toolsJar)) &&
+		fileExists(path.Join(toolsDir, libexecDir, execJar)) &&
 		fileExists(path.Join(toolsDir, depsEDN)) &&
-		fileExists(path.Join(toolsDir, exampleDepsEDN)) {
+		fileExists(path.Join(toolsDir, exampleDepsEDN)) &&
+		fileExists(path.Join(toolsDir, cljToolsEDN)) {
 		return nil
 	}
 
@@ -226,6 +238,7 @@ func getClojureTools(toolsDir string) error {
 	err = pickFiles(toolsDir, tarPathTmp, []string{
 		depsEDN,
 		exampleDepsEDN,
+		cljToolsEDN,
 		execJar,
 		toolsJar,
 	})
@@ -256,7 +269,7 @@ func getConfigPaths(conf *t4cConfig, configDir string, toolsDir string, repro bo
 	return configPaths
 }
 
-func copyExampleDeps(destDir string, toolsDir string) error {
+func copyExampleDepsEdn(destDir string, toolsDir string) error {
 	var t4CDeps = path.Join(toolsDir, exampleDepsEDN)
 	var localDeps = path.Join(destDir, depsEDN)
 
@@ -271,4 +284,21 @@ func copyExampleDeps(destDir string, toolsDir string) error {
 	}
 
 	return copyFile(localDeps, t4CDeps)
+}
+
+func copyToolsEdn(destDir string, toolsDir string) error {
+	var toolsEdn = path.Join(toolsDir, cljToolsEDN)
+	var localToolsEdn = path.Join(destDir, cljToolsEDN)
+
+	if fileExists(localToolsEdn) {
+		return nil
+	}
+	if destDir != "" {
+		err := os.MkdirAll(destDir, os.ModePerm)
+		if err != nil {
+			return err
+		}
+	}
+
+	return copyFile(localToolsEdn, toolsEdn)
 }

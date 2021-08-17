@@ -16,6 +16,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path"
 	"runtime"
 	"strconv"
 	"strings"
@@ -622,6 +623,55 @@ var testDepItems = []TestReadItem{
 		},
 		"",
 	},
+	{ // clojure execute tool -T (no alias)
+		[]string{"clojure",
+			"-T",
+		},
+		allOpts{
+			Clj:        cljOpts{},
+			Init:       initOpts{},
+			Main:       mainOpts{},
+			Args:       []string{},
+			NativeArgs: true,
+			Rlwrap:     false,
+			Mode:       "tool",
+		},
+		"",
+	},
+	{ // clojure execute tool -T (alias)
+		[]string{"clojure",
+			"-T:foo",
+		},
+		allOpts{
+			Clj: cljOpts{
+				ToolAliases: ":foo",
+			},
+			Init:       initOpts{},
+			Main:       mainOpts{},
+			Args:       []string{},
+			NativeArgs: true,
+			Rlwrap:     false,
+			Mode:       "tool",
+		},
+		"",
+	},
+	{ // clojure execute tool -T (with tool name)
+		[]string{"clojure",
+			"-TMyTool",
+		},
+		allOpts{
+			Clj: cljOpts{
+				ToolName: "MyTool",
+			},
+			Init:       initOpts{},
+			Main:       mainOpts{},
+			Args:       []string{},
+			NativeArgs: true,
+			Rlwrap:     false,
+			Mode:       "tool",
+		},
+		"",
+	},
 	{ // clojure exec -X (no alias)
 		[]string{"clojure",
 			"-X",
@@ -685,21 +735,6 @@ var testDepItems = []TestReadItem{
 			Mode:       "repl",
 		},
 		"-O is no longer supported, use -A with repl, -M for main, or -X for exec",
-	},
-	{ // not supported: -T
-		[]string{"clojure",
-			"-T:argT",
-		},
-		allOpts{
-			Clj:        cljOpts{},
-			Init:       initOpts{},
-			Main:       mainOpts{},
-			Args:       []string{},
-			NativeArgs: true,
-			Rlwrap:     false,
-			Mode:       "repl",
-		},
-		"-T is no longer supported, use -A with repl, -M for main, or -X for exec",
 	},
 	{ // not supported: -Sresolve-tags
 		[]string{"clojure",
@@ -1061,7 +1096,7 @@ func TestChecksumOf(t *testing.T) {
 		"filepath2.edn",
 	}
 	// output
-	expected := "2414352071"
+	expected := "3742641631"
 
 	res := checksumOf(&options, configPaths)
 	if res != expected {
@@ -1079,7 +1114,7 @@ func TestChecksumOf(t *testing.T) {
 	}
 
 	// different output is expected
-	expected = "414039739"
+	expected = "195152154"
 
 	res = checksumOf(&options, configPaths)
 	if res != expected {
@@ -1096,13 +1131,31 @@ func TestIsStale(t *testing.T) {
 	cpFile := "classpathFile.edn"
 	newerFile := "newer_filepath.edn"
 
+	// tools files to use
+	olderToolName := "older_tool"
+	newerToolName := "newer_tool"
+
+	configDir, err := getConfigDir()
+	if err != nil {
+		t.Error("could not get configDir based dir")
+	}
+
 	// create an, older than cp, config path file
-	err := ioutil.WriteFile(olderFile, []byte("Hello"), 0755)
+	err = ioutil.WriteFile(olderFile, []byte("Hello"), 0755)
 	if err != nil {
 		t.Errorf("unable to write file: %v", err)
 		t.FailNow()
 	} else {
 		defer os.Remove(olderFile)
+	}
+
+	// create an, older than cp, tool file
+	err = ioutil.WriteFile(path.Join(getCljToolsDir(configDir), olderToolName+".edn"), []byte("Hello"), 0755)
+	if err != nil {
+		t.Errorf("unable to write file: %v", err)
+		t.FailNow()
+	} else {
+		defer os.Remove(path.Join(getCljToolsDir(configDir), olderToolName+".edn"))
 	}
 
 	time.Sleep(100 * time.Millisecond)
@@ -1127,10 +1180,21 @@ func TestIsStale(t *testing.T) {
 		defer os.Remove(newerFile)
 	}
 
+	// create a, newer than cp, tool file
+	err = ioutil.WriteFile(path.Join(getCljToolsDir(configDir), newerToolName+".edn"), []byte("Hello"), 0755)
+	if err != nil {
+		t.Errorf("unable to write file: %v", err)
+		t.FailNow()
+	} else {
+		defer os.Remove(path.Join(getCljToolsDir(configDir), newerToolName+".edn"))
+	}
+
 	// forced cp
 	// inputs
 	options.Clj.Force = true
 	options.Clj.Trace = false
+	options.Clj.Tree = false
+	options.Clj.Prep = false
 	config.cpFile = cpFile
 	configPaths := []string{newerFile}
 	// output
@@ -1149,6 +1213,48 @@ func TestIsStale(t *testing.T) {
 	// inputs
 	options.Clj.Force = false
 	options.Clj.Trace = true
+	options.Clj.Tree = false
+	options.Clj.Prep = false
+	config.cpFile = cpFile
+	configPaths = []string{newerFile}
+	// output
+	expected = true
+
+	res, err = isStale(&options, config, configPaths)
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+		t.FailNow()
+	}
+	if res != expected {
+		t.Errorf("isStale failed, expected %v, got %v", expected, res)
+	}
+
+	// tree
+	// inputs
+	options.Clj.Force = false
+	options.Clj.Trace = false
+	options.Clj.Tree = true
+	options.Clj.Prep = false
+	config.cpFile = cpFile
+	configPaths = []string{newerFile}
+	// output
+	expected = true
+
+	res, err = isStale(&options, config, configPaths)
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+		t.FailNow()
+	}
+	if res != expected {
+		t.Errorf("isStale failed, expected %v, got %v", expected, res)
+	}
+
+	// prep
+	// inputs
+	options.Clj.Force = false
+	options.Clj.Trace = false
+	options.Clj.Tree = false
+	options.Clj.Prep = true
 	config.cpFile = cpFile
 	configPaths = []string{newerFile}
 	// output
@@ -1167,6 +1273,8 @@ func TestIsStale(t *testing.T) {
 	// inputs
 	options.Clj.Force = false
 	options.Clj.Trace = false
+	options.Clj.Tree = false
+	options.Clj.Prep = false
 	config.cpFile = "notexisting_cpFile.edn"
 	configPaths = []string{newerFile}
 	// output
@@ -1185,6 +1293,8 @@ func TestIsStale(t *testing.T) {
 	// inputs
 	options.Clj.Force = false
 	options.Clj.Trace = false
+	options.Clj.Tree = false
+	options.Clj.Prep = false
 	config.cpFile = cpFile
 	configPaths = []string{"notexisting_file.edn"}
 	// output
@@ -1203,6 +1313,8 @@ func TestIsStale(t *testing.T) {
 	// inputs
 	options.Clj.Force = false
 	options.Clj.Trace = false
+	options.Clj.Tree = false
+	options.Clj.Prep = false
 	config.cpFile = cpFile
 	configPaths = []string{olderFile}
 	// output
@@ -1221,6 +1333,8 @@ func TestIsStale(t *testing.T) {
 	// inputs
 	options.Clj.Force = false
 	options.Clj.Trace = false
+	options.Clj.Tree = false
+	options.Clj.Prep = false
 	config.cpFile = cpFile
 	configPaths = []string{newerFile}
 	// output
@@ -1239,8 +1353,73 @@ func TestIsStale(t *testing.T) {
 	// inputs
 	options.Clj.Force = false
 	options.Clj.Trace = false
+	options.Clj.Tree = false
+	options.Clj.Prep = false
 	config.cpFile = cpFile
 	configPaths = []string{olderFile, newerFile}
+	// output
+	expected = true
+
+	res, err = isStale(&options, config, configPaths)
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+		t.FailNow()
+	}
+	if res != expected {
+		t.Errorf("isStale failed, expected %v, got %v", expected, res)
+	}
+
+	// existing cpFile, existing older config paths file, also existing an older tools file
+	// inputs
+	options.Clj.Force = false
+	options.Clj.Trace = false
+	options.Clj.Tree = false
+	options.Clj.Prep = false
+	options.Clj.ToolName = olderToolName
+	configPaths = []string{olderFile}
+	config.cpFile = cpFile
+	// output
+	expected = false
+
+	res, err = isStale(&options, config, configPaths)
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+		t.FailNow()
+	}
+	if res != expected {
+		t.Errorf("isStale failed, expected %v, got %v", expected, res)
+	}
+
+	// existing cpFile, also existing an older tools file
+	// inputs
+	options.Clj.Force = false
+	options.Clj.Trace = false
+	options.Clj.Tree = false
+	options.Clj.Prep = false
+	options.Clj.ToolName = olderToolName
+	configPaths = []string{newerFile}
+	config.cpFile = cpFile
+	// output
+	expected = true
+
+	res, err = isStale(&options, config, configPaths)
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+		t.FailNow()
+	}
+	if res != expected {
+		t.Errorf("isStale failed, expected %v, got %v", expected, res)
+	}
+
+	// existing cpFile, also existing a newer tools file
+	// inputs
+	options.Clj.Force = false
+	options.Clj.Trace = false
+	options.Clj.Tree = false
+	options.Clj.Prep = false
+	options.Clj.ToolName = newerToolName
+	configPaths = []string{olderFile}
+	config.cpFile = cpFile
 	// output
 	expected = true
 
@@ -1262,6 +1441,8 @@ func TestBuildToolsArgs(t *testing.T) {
 			ClassPathAliases: ":argC",
 			MainAliases:      ":argM",
 			ReplAliases:      []string{":argA"},
+			ToolName:         "MyTool",
+			ToolAliases:      ":argT",
 			ExecAliases:      ":argX",
 			ForceCP:          "forced-class-path",
 			Pom:              false,
@@ -1297,6 +1478,9 @@ func TestBuildToolsArgs(t *testing.T) {
 		"-M:argM",
 		"-A:argA",
 		"-X:argX",
+		"--tool-name",
+		"MyTool",
+		"-T:argT",
 		"--skip-cp",
 		"--threads",
 		"42",
@@ -1322,6 +1506,9 @@ func TestBuildToolsArgs(t *testing.T) {
 		"-M:argM",
 		"-A:argA",
 		"-X:argX",
+		"--tool-name",
+		"MyTool",
+		"-T:argT",
 		"--skip-cp",
 		"--threads",
 		"42",
@@ -1347,6 +1534,39 @@ func TestBuildToolsArgs(t *testing.T) {
 		"-M:argM",
 		"-A:argA",
 		"-X:argX",
+		"--tool-name",
+		"MyTool",
+		"-T:argT",
+		"--skip-cp",
+		"--threads",
+		"42",
+		"--tree",
+		"--trace",
+	}
+
+	buildToolsArgs(&config, stale, &options)
+	args = fmt.Sprintf("%+v", config.toolsArgs)
+	expectedArgs = fmt.Sprintf("%+v", expected)
+	if len(config.toolsArgs) != len(expected) || args != expectedArgs {
+		t.Errorf("buildToolsArgs failed, expected %v, got %v", expected, config.toolsArgs)
+	}
+
+	// toolsArgs changed when: Clj.Tree == true, stale == true
+	options.Mode = "tool"
+	config.toolsArgs = []string{"not_changed"}
+	stale = true
+	expected = []string{
+		"--config-data",
+		`{:deps {clansi {:mvn/version "1.0.0"}}}`,
+		"-R:argR",
+		"-C:argC",
+		"-M:argM",
+		"-A:argA",
+		"-X:argX",
+		"--tool-mode",
+		"--tool-name",
+		"MyTool",
+		"-T:argT",
 		"--skip-cp",
 		"--threads",
 		"42",
@@ -1464,13 +1684,13 @@ func TestActiveClassPath(t *testing.T) {
 
 func TestArgsDescription(t *testing.T) {
 	// input
-	pathVector := "testPath"
-	toolsDir := "testToolsDir"
-	configDir := "testConfigDir"
-	cacheDir := "testCacheDir"
+	pathVector := "test" + string(os.PathSeparator) + "Path"
+	toolsDir := "test" + string(os.PathSeparator) + "ToolsDir"
+	configDir := "test" + string(os.PathSeparator) + "ConfigDir"
+	cacheDir := "test" + string(os.PathSeparator) + "CacheDir"
 	config := t4cConfig{
-		configUser:    "testConfigUser",
-		configProject: "testConfigProject",
+		configUser:    "test" + string(os.PathSeparator) + "ConfigUser",
+		configProject: "test" + string(os.PathSeparator) + "ConfigProject",
 	}
 	options := allOpts{
 		Clj: cljOpts{
@@ -1484,12 +1704,12 @@ func TestArgsDescription(t *testing.T) {
 	}
 	// output
 	expected := `{:version "` + version + `"
- :config-files [` + pathVector + `]
- :config-user "` + config.configUser + `"
- :config-project "` + config.configProject + `"
- :install-dir "` + toolsDir + `"
- :config-dir "` + configDir + `"
- :cache-dir "` + cacheDir + `"
+ :config-files [` + escOnWindows(pathVector) + `]
+ :config-user "` + escOnWindows(config.configUser) + `"
+ :config-project "` + escOnWindows(config.configProject) + `"
+ :install-dir "` + escOnWindows(toolsDir) + `"
+ :config-dir "` + escOnWindows(configDir) + `"
+ :cache-dir "` + escOnWindows(cacheDir) + `"
  :force ` + strconv.FormatBool(options.Clj.Force) + `
  :repro ` + strconv.FormatBool(options.Clj.Repro) + `
  :main-aliases "` + options.Clj.MainAliases + `"
@@ -1520,5 +1740,41 @@ func TestGetInitArgs(t *testing.T) {
 	expectedArgs := fmt.Sprintf("%+v", expected)
 	if len(res) != len(expected) || args != expectedArgs {
 		t.Errorf("getInitArgs failed, expected %v, got %v", expected, res)
+	}
+}
+
+func TestGetCacheOpts(t *testing.T) {
+	// files to use
+	cacheOptsFile := "cache.opt"
+	cacheOptsFileContent := "Hello\nWorld"
+	cacheOptsNotExistingFile := "not_existing_file"
+
+	// create cp file
+	err := ioutil.WriteFile(cacheOptsFile, []byte(cacheOptsFileContent), 0755)
+	if err != nil {
+		t.Errorf("unable to write file: %v", err)
+		t.FailNow()
+	} else {
+		defer os.Remove(cacheOptsFile)
+	}
+
+	expected := strings.Split(cacheOptsFileContent, "\n")
+	res, err := getCacheOpts(cacheOptsFile)
+	if err != nil {
+		t.Errorf("unable to getCacheOpts: %v", err)
+		t.FailNow()
+	}
+	if len(res) != len(expected) {
+		t.Errorf("getCacheOpts failed, expected %v, got %v", expected, res)
+	}
+
+	expected = []string{}
+	res, err = getCacheOpts(cacheOptsNotExistingFile)
+	if err != nil {
+		t.Errorf("unable to getCacheOpts: %v", err)
+		t.FailNow()
+	}
+	if len(res) != len(expected) {
+		t.Errorf("getCacheOpts failed, expected %v, got %v", expected, res)
 	}
 }

@@ -162,6 +162,15 @@ func TestGetConfigDir(t *testing.T) {
 	}
 }
 
+func TestGetCljToolsDir(t *testing.T) {
+	expected := path.Join("test", "tools")
+	res := getCljToolsDir("test")
+
+	if res != expected {
+		t.Errorf("wrong cljToolsDir, expected `%v`, got `%v`", expected, res)
+	}
+}
+
 func TestFileExists(t *testing.T) {
 	tmpTestFile := "test-filename.txt"
 	err := ioutil.WriteFile(tmpTestFile, []byte("Hello"), 0755)
@@ -292,5 +301,21 @@ func TestCheckIsNewerFile(t *testing.T) {
 	}
 	if newer != false {
 		t.Errorf("newer file check, first to second, expecting: %v, got %v", false, newer)
+	}
+}
+
+func TestGetExecCpFile(t *testing.T) {
+	plainTextCp := path.Join("this", "is", "a", "text", "cp")
+
+	execCp := getExecCpFile(plainTextCp, "exec.jar")
+	if execCp != plainTextCp+string(os.PathListSeparator)+"exec.jar" {
+		t.Errorf("error on getting exec cp, got: %v", execCp)
+	}
+
+	cpFile := "@this_is_a_file.cp"
+
+	execCp = getExecCpFile(cpFile, "exec.jar")
+	if execCp != cpFile+".exec" {
+		t.Errorf("error on getting exec cp, got: %v", execCp)
 	}
 }

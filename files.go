@@ -20,6 +20,7 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"strings"
 )
 
 func getCljCacheDir(configDir string) (string, error) {
@@ -52,6 +53,10 @@ func getConfigDir() (string, error) {
 		return "", error
 	}
 	return path.Join(env, ".clojure"), nil
+}
+
+func getCljToolsDir(configDir string) string {
+	return path.Join(configDir, "tools")
 }
 
 func fileExists(filename string) bool {
@@ -162,6 +167,9 @@ func pickFiles(toolsDir string, tarPath string, files []string) error {
 			saveFrom := path.Join("clojure-tools", f)
 			if hdr.Name == saveFrom {
 				saveTo := path.Join(toolsDir, f)
+				if strings.HasSuffix(f, ".jar") {
+					saveTo = path.Join(toolsDir, libexecDir, f)
+				}
 				saveFile, err := os.Create(saveTo)
 				if err != nil {
 					return err
@@ -177,4 +185,23 @@ func pickFiles(toolsDir string, tarPath string, files []string) error {
 		}
 	}
 	return nil
+}
+
+func getExecCpFile(cp string, execJarPath string) string {
+	cpFile := cp
+	if strings.HasPrefix(cp, "@") {
+		cpFile = strings.TrimPrefix(cp, "@") + ".exec"
+		newer, _ := checkIsNewerFile(cpFile, cp)
+		if !newer {
+			copyFile(cpFile, strings.TrimPrefix(cp, "@"))
+
+			f, _ := os.OpenFile(cpFile, os.O_APPEND|os.O_WRONLY, 0644)
+			defer f.Close()
+			f.Write([]byte(string(os.PathListSeparator) + execJarPath))
+		}
+		cpFile = "@" + cpFile
+	} else {
+		cpFile = cp + string(os.PathListSeparator) + execJarPath
+	}
+	return cpFile
 }

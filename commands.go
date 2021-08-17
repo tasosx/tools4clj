@@ -57,16 +57,13 @@ func generatePomCmd(conf *t4cConfig, toolsClassPath string) exec.Cmd {
 }
 
 func clojureExecuteCmd(jvmCacheOpts []string, jvmOpts []string, basisFile string,
-	execJarPath string, cp string, execAliases string, args []string) exec.Cmd {
+	execJarPath string, cp string, args []string) exec.Cmd {
 
 	cmdArgs := append([]string{}, jvmCacheOpts...)
 	cmdArgs = append(cmdArgs, jvmOpts...)
 	cmdArgs = append(cmdArgs, "-Dclojure.basis="+basisFile,
-		"-classpath", cp+string(os.PathListSeparator)+execJarPath)
+		"-classpath", getExecCpFile(cp, execJarPath))
 	cmdArgs = append(cmdArgs, "clojure.main", "-m", "clojure.run.exec")
-	if len(execAliases) > 0 {
-		cmdArgs = append(cmdArgs, "--aliases", execAliases)
-	}
 	cmdArgs = append(cmdArgs, args...)
 
 	var cmd = exec.Command(javaPath, cmdArgs...)

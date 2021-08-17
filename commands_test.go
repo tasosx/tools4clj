@@ -134,11 +134,10 @@ func TestClojureExecuteCmd(t *testing.T) {
 
 	// test clojure -X execute, no aliases, no args
 	{
-		execAliases := ""
 		args := []string{}
 
 		cmd := clojureExecuteCmd(jvmCacheOpts, jvmOpts, conf.basisFile,
-			execJarPath, cp, execAliases, args)
+			execJarPath, cp, args)
 
 		expected := []string{javaPath}
 
@@ -164,11 +163,10 @@ func TestClojureExecuteCmd(t *testing.T) {
 
 	// test clojure -X execute, with aliases, no args
 	{
-		execAliases := ":foo"
-		args := []string{}
+		args := []string{"-X:foo"}
 
 		cmd := clojureExecuteCmd(jvmCacheOpts, jvmOpts, conf.basisFile,
-			execJarPath, cp, execAliases, args)
+			execJarPath, cp, args)
 
 		expected := []string{javaPath}
 
@@ -177,9 +175,6 @@ func TestClojureExecuteCmd(t *testing.T) {
 		expected = append(expected, "-Dclojure.basis="+conf.basisFile,
 			"-classpath", cp+string(os.PathListSeparator)+execJarPath)
 		expected = append(expected, "clojure.main", "-m", "clojure.run.exec")
-		if len(execAliases) > 0 {
-			expected = append(expected, "--aliases", execAliases)
-		}
 		expected = append(expected, args...)
 
 		expected = removeEmpty(expected)
@@ -198,11 +193,10 @@ func TestClojureExecuteCmd(t *testing.T) {
 
 	// test clojure -X execute, no aliases, with args
 	{
-		execAliases := ""
 		args := []string{"arg1", "arg2"}
 
 		cmd := clojureExecuteCmd(jvmCacheOpts, jvmOpts, conf.basisFile,
-			execJarPath, cp, execAliases, args)
+			execJarPath, cp, args)
 
 		expected := []string{javaPath}
 
@@ -211,9 +205,6 @@ func TestClojureExecuteCmd(t *testing.T) {
 		expected = append(expected, "-Dclojure.basis="+conf.basisFile,
 			"-classpath", cp+string(os.PathListSeparator)+execJarPath)
 		expected = append(expected, "clojure.main", "-m", "clojure.run.exec")
-		if len(execAliases) > 0 {
-			expected = append(expected, "--aliases", execAliases)
-		}
 		expected = append(expected, args...)
 
 		expected = removeEmpty(expected)
@@ -232,11 +223,10 @@ func TestClojureExecuteCmd(t *testing.T) {
 
 	// test clojure -X execute, with aliases, and args
 	{
-		execAliases := ":foo"
-		args := []string{"arg1", "arg2"}
+		args := []string{"-X:foo", "arg1", "arg2"}
 
 		cmd := clojureExecuteCmd(jvmCacheOpts, jvmOpts, conf.basisFile,
-			execJarPath, cp, execAliases, args)
+			execJarPath, cp, args)
 
 		expected := []string{javaPath}
 
@@ -245,9 +235,6 @@ func TestClojureExecuteCmd(t *testing.T) {
 		expected = append(expected, "-Dclojure.basis="+conf.basisFile,
 			"-classpath", cp+string(os.PathListSeparator)+execJarPath)
 		expected = append(expected, "clojure.main", "-m", "clojure.run.exec")
-		if len(execAliases) > 0 {
-			expected = append(expected, "--aliases", execAliases)
-		}
 		expected = append(expected, args...)
 
 		expected = removeEmpty(expected)
