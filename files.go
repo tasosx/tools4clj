@@ -190,10 +190,11 @@ func pickFiles(toolsDir string, tarPath string, files []string) error {
 func getExecCpFile(cp string, execJarPath string) string {
 	cpFile := cp
 	if strings.HasPrefix(cp, "@") {
-		cpFile = strings.TrimPrefix(cp, "@") + ".exec"
-		newer, _ := checkIsNewerFile(cpFile, cp)
+		cpOriginalFile := strings.TrimPrefix(cp, "@")
+		cpFile = cpOriginalFile + ".exec"
+		newer, _ := checkIsNewerFile(cpFile, cpOriginalFile)
 		if !newer {
-			copyFile(cpFile, strings.TrimPrefix(cp, "@"))
+			copyFile(cpFile, cpOriginalFile)
 
 			f, _ := os.OpenFile(cpFile, os.O_APPEND|os.O_WRONLY, 0644)
 			defer f.Close()
