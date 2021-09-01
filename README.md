@@ -4,7 +4,7 @@
 In the shadows of the official clojure tools:
 
 ```
-const version = "1.10.3.943"
+const version = "1.10.3.967"
 ```
 
 
@@ -61,7 +61,7 @@ You need to have Java and, also, Go installed and ready to develop (...have your
 
 To install (or update) the `clojure` and `clj` binary launchers, on a shell/command line prompt, run:
 ```
-go get -u github.com/tasosx/tools4clj/cmd/...
+go install github.com/tasosx/tools4clj/cmd/...@latest
 ```
 
 You are ready to _go_ clojure... 
@@ -75,7 +75,7 @@ On the first launch of `clojure` or `clj`, after a tools4clj update or installat
 
 So an one-liner for a tools update is:
 ```
-go get -u github.com/tasosx/tools4clj/cmd/... && clojure
+go install github.com/tasosx/tools4clj/cmd/...@latest && clojure
 ```
 
 Also, `clj --rebel` runs an extended version of clj that, instead of using `rlwrap`, it uses the terminal readline library **bhauman/rebel-readline**, giving a more polished look and feel. 

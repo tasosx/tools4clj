@@ -113,7 +113,7 @@ For more info, see:
 `
 
 const (
-	version        = "1.10.3.943"
+	version        = "1.10.3.967"
 	depsEDN        = "deps.edn"
 	exampleDepsEDN = "example-deps.edn"
 	cljToolsEDN    = "tools.edn"
