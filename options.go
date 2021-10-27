@@ -355,30 +355,6 @@ func setMainOpts(all *allOpts, args []string, pos int) (int, error) {
 		pos++
 	}
 
-	// for {
-	// 	if pos >= len(args) {
-	// 		break
-	// 	}
-
-	// 	if args[pos] == "-m" || args[pos] == "--main" {
-	// 		if pos+1 > len(args)-1 {
-	// 			return pos, errors.New("main ns-name not defined for " + args[pos] + " option")
-	// 		}
-	// 		pos++
-	// 		all.Main.MainArgs = append(all.Main.MainArgs, "-m", args[pos])
-	// 	} else if args[pos] == "-r" || args[pos] == "--repl" {
-	// 		all.Main.Repl = true
-	// 	} else if args[pos] == "-h" || args[pos] == "-?" || args[pos] == "--help" {
-	// 		all.Main.Help = true
-	// 		all.Main.HelpArg = args[pos]
-	// 	} else {
-	// 		// move to the next options group
-	// 		break
-	// 	}
-	// 	pos++
-	// 	break
-	// }
-
 	return pos, nil
 }
 
