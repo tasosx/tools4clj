@@ -550,6 +550,26 @@ func isStale(options *allOpts, config t4cConfig, configPaths []string) (bool, er
 					break
 				}
 			}
+			if fileExists(config.manifestFile) {
+				manifests, err := readNonEmptyLines(config.manifestFile)
+				if err != nil {
+					return false, err
+				}
+				for _, manifest := range manifests {
+					if !fileExists(manifest) {
+						stale = true
+						break
+					}
+					newer, err := checkIsNewerFile(manifest, config.cpFile)
+					if err != nil {
+						return false, err
+					}
+					if newer {
+						stale = true
+						break
+					}
+				}
+			}
 		}
 	}
 	return stale, nil

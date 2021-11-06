@@ -30,7 +30,8 @@ func makeClassPathCmd(conf *t4cConfig, toolsClassPath string) exec.Cmd {
 		"--basis-file", conf.basisFile,
 		"--cp-file", conf.cpFile,
 		"--jvm-file", conf.jvmFile,
-		"--main-file", conf.mainFile)
+		"--main-file", conf.mainFile,
+		"--manifest-file", conf.manifestFile)
 	cmdArgs = append(cmdArgs, conf.toolsArgs...)
 
 	var cmd = exec.Command(javaPath, cmdArgs...)

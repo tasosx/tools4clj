@@ -113,7 +113,7 @@ For more info, see:
 `
 
 const (
-	version        = "1.10.3.998"
+	version        = "1.10.3.1020"
 	depsEDN        = "deps.edn"
 	exampleDepsEDN = "example-deps.edn"
 	cljToolsEDN    = "tools.edn"
@@ -141,6 +141,7 @@ type t4cConfig struct {
 	jvmFile       string
 	mainFile      string
 	basisFile     string
+	manifestFile  string
 	toolsArgs     []string
 }
 
@@ -150,6 +151,7 @@ func buildCmdConfigs(conf *t4cConfig, cacheDir string, ck string) {
 	conf.jvmFile = path.Join(cacheDir, ck+".jvm")
 	conf.mainFile = path.Join(cacheDir, ck+".main")
 	conf.basisFile = path.Join(cacheDir, ck+".basis")
+	conf.manifestFile = path.Join(cacheDir, ck+".manifest")
 }
 
 func getTools4CljPath() (string, error) {

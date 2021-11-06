@@ -26,9 +26,11 @@ func TestMakeClassPathCmd(t *testing.T) {
 		configUser:    "test-config-user",
 		configProject: "test-config-project",
 		libsFile:      "test-libs-file",
+		basisFile:     "test-basis-file",
 		cpFile:        "test-cp-file",
 		jvmFile:       "test-jvm-file",
 		mainFile:      "test-main-file",
+		manifestFile:  "test-manifest-file",
 		toolsArgs: []string{
 			"arg1",
 			"arg2",
@@ -53,6 +55,7 @@ func TestMakeClassPathCmd(t *testing.T) {
 			"--cp-file", conf.cpFile,
 			"--jvm-file", conf.jvmFile,
 			"--main-file", conf.mainFile,
+			"--manifest-file", conf.manifestFile,
 		}
 		expected = append(expected, conf.toolsArgs...)
 		expected = removeEmpty(expected)

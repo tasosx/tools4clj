@@ -1433,6 +1433,168 @@ func TestIsStale(t *testing.T) {
 	}
 }
 
+func TestIsStaleOnManifests(t *testing.T) {
+	options := allOpts{}
+	config := t4cConfig{}
+
+	// files to use
+	cpFile := "classpathFile.edn"
+
+	configDir, err := getConfigDir()
+	if err != nil {
+		t.Error("could not get configDir based dir")
+	}
+
+	// manifests files to use
+	manifestsFileOlder := path.Join(getCljToolsDir(configDir), "older.manifest")
+	manifestsFileNewer := path.Join(getCljToolsDir(configDir), "newer.manifest")
+	manifestsFileNonExisting := path.Join(getCljToolsDir(configDir), "non_existing_file.manifest")
+
+	olderManifestName := "older.edn"
+	newerManifestName := "newer.edn"
+	nonExistingManifestName := "non_existing.edn"
+
+	// create manifests files with older/newer/non-existing content
+	err = ioutil.WriteFile(manifestsFileOlder, []byte(olderManifestName), 0755)
+	if err != nil {
+		t.Errorf("unable to write file: %v", err)
+		t.FailNow()
+	} else {
+		defer os.Remove(manifestsFileOlder)
+	}
+
+	err = ioutil.WriteFile(manifestsFileNewer, []byte(newerManifestName), 0755)
+	if err != nil {
+		t.Errorf("unable to write file: %v", err)
+		t.FailNow()
+	} else {
+		defer os.Remove(manifestsFileNewer)
+	}
+
+	err = ioutil.WriteFile(manifestsFileNonExisting, []byte(nonExistingManifestName), 0755)
+	if err != nil {
+		t.Errorf("unable to write file: %v", err)
+		t.FailNow()
+	} else {
+		defer os.Remove(manifestsFileNonExisting)
+	}
+
+	// create an, older than cp, manifest
+	err = ioutil.WriteFile(olderManifestName, []byte("Hello"), 0755)
+	if err != nil {
+		t.Errorf("unable to write file: %v", err)
+		t.FailNow()
+	} else {
+		defer os.Remove(olderManifestName)
+	}
+
+	time.Sleep(100 * time.Millisecond)
+
+	// create cp file
+	err = ioutil.WriteFile(cpFile, []byte("Hello"), 0755)
+	if err != nil {
+		t.Errorf("unable to write file: %v", err)
+		t.FailNow()
+	} else {
+		defer os.Remove(cpFile)
+	}
+
+	time.Sleep(100 * time.Millisecond)
+
+	// create a, newer than cp, manifest file
+	err = ioutil.WriteFile(newerManifestName, []byte("Hello"), 0755)
+	if err != nil {
+		t.Errorf("unable to write file: %v", err)
+		t.FailNow()
+	} else {
+		defer os.Remove(newerManifestName)
+	}
+
+	// existing cpFile, not existing manifest file
+	// inputs
+	options.Clj.Force = false
+	options.Clj.Trace = false
+	options.Clj.Tree = false
+	options.Clj.Prep = false
+	configPaths := []string{}
+	config.cpFile = cpFile
+	config.manifestFile = "not_existing.manifest"
+	// output
+	expected := false
+
+	res, err := isStale(&options, config, configPaths)
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+		t.FailNow()
+	}
+	if res != expected {
+		t.Errorf("isStale failed, expected %v, got %v", expected, res)
+	}
+
+	// existing cpFile, existing manifest file, with older manifests content
+	// inputs
+	options.Clj.Force = false
+	options.Clj.Trace = false
+	options.Clj.Tree = false
+	options.Clj.Prep = false
+	configPaths = []string{}
+	config.cpFile = cpFile
+	config.manifestFile = manifestsFileOlder
+	// output
+	expected = false
+
+	res, err = isStale(&options, config, configPaths)
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+		t.FailNow()
+	}
+	if res != expected {
+		t.Errorf("isStale failed, expected %v, got %v", expected, res)
+	}
+
+	// existing cpFile, existing manifest file, with newer manifests content
+	// inputs
+	options.Clj.Force = false
+	options.Clj.Trace = false
+	options.Clj.Tree = false
+	options.Clj.Prep = false
+	configPaths = []string{}
+	config.cpFile = cpFile
+	config.manifestFile = manifestsFileNewer
+	// output
+	expected = true
+
+	res, err = isStale(&options, config, configPaths)
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+		t.FailNow()
+	}
+	if res != expected {
+		t.Errorf("isStale failed, expected %v, got %v", expected, res)
+	}
+
+	// existing cpFile, existing manifest file, with non existing manifests content
+	// inputs
+	options.Clj.Force = false
+	options.Clj.Trace = false
+	options.Clj.Tree = false
+	options.Clj.Prep = false
+	configPaths = []string{}
+	config.cpFile = cpFile
+	config.manifestFile = manifestsFileNonExisting
+	// output
+	expected = true
+
+	res, err = isStale(&options, config, configPaths)
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+		t.FailNow()
+	}
+	if res != expected {
+		t.Errorf("isStale failed, expected %v, got %v", expected, res)
+	}
+}
+
 func TestBuildToolsArgs(t *testing.T) {
 	options := allOpts{
 		Clj: cljOpts{
