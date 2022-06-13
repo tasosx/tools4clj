@@ -6,6 +6,9 @@ https://github.com/clojure/brew-install/blob/1.10.1/CHANGELOG.md
 
 ## Releases
 
+- Forty-fifth release [2022-06-13]
+    - Based on clojure tools v.1.11.1.1124
+
 - Forty-fourth release [2022-06-11]
     - Based on clojure tools v.1.11.1.1119
 
