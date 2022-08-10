@@ -70,7 +70,7 @@ func runClojure(osArgs []string, cljRun bool) {
 	}
 
 	if opts.Main.Help {
-		fmt.Println(usage)
+		fmt.Print(usage + "\n")
 		return
 	}
 
