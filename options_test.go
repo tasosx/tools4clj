@@ -1129,6 +1129,7 @@ func TestIsStale(t *testing.T) {
 	// files to use
 	olderFile := "older_filepath.edn"
 	cpFile := "classpathFile.edn"
+	cpFileWithJars := "classpathJarsFile.edn"
 	newerFile := "newer_filepath.edn"
 
 	// tools files to use
@@ -1167,6 +1168,15 @@ func TestIsStale(t *testing.T) {
 		t.FailNow()
 	} else {
 		defer os.Remove(cpFile)
+	}
+
+	// create cp file with non existing jars
+	err = ioutil.WriteFile(cpFileWithJars, []byte("hello.jar:world.jar"), 0755)
+	if err != nil {
+		t.Errorf("unable to write file: %v", err)
+		t.FailNow()
+	} else {
+		defer os.Remove(cpFileWithJars)
 	}
 
 	time.Sleep(100 * time.Millisecond)
@@ -1319,6 +1329,26 @@ func TestIsStale(t *testing.T) {
 	configPaths = []string{olderFile}
 	// output
 	expected = false
+
+	res, err = isStale(&options, config, configPaths)
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+		t.FailNow()
+	}
+	if res != expected {
+		t.Errorf("isStale failed, expected %v, got %v", expected, res)
+	}
+
+	// existing cpFile, with non existing jars
+	// inputs
+	options.Clj.Force = false
+	options.Clj.Trace = false
+	options.Clj.Tree = false
+	options.Clj.Prep = false
+	config.cpFile = cpFileWithJars
+	configPaths = []string{olderFile}
+	// output
+	expected = true
 
 	res, err = isStale(&options, config, configPaths)
 	if err != nil {

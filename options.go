@@ -521,9 +521,8 @@ func checksumOf(options *allOpts, configPaths []string) string {
 }
 
 func isStale(options *allOpts, config t4cConfig, configPaths []string) (bool, error) {
-	stale := false
 	if options.Clj.Force || options.Clj.Trace || options.Clj.Tree || options.Clj.Prep || !fileExists(config.cpFile) {
-		stale = true
+		return true, nil
 	} else {
 		newer := false
 		if len(options.Clj.ToolName) > 0 {
@@ -538,18 +537,30 @@ func isStale(options *allOpts, config t4cConfig, configPaths []string) (bool, er
 			}
 		}
 		if newer {
-			stale = true
+			return true, nil
 		} else {
+			if fileExists(config.cpFile) {
+				b, err := ioutil.ReadFile(config.cpFile)
+				if err != nil {
+					return false, err
+				}
+				for _, entry := range strings.Split(string(b), ":") {
+					if strings.HasSuffix(entry, ".jar") && !fileExists(entry) {
+						return true, nil
+					}
+				}
+			}
+
 			for _, path := range configPaths {
 				newer, err := checkIsNewerFile(path, config.cpFile)
 				if err != nil {
 					return false, err
 				}
 				if newer {
-					stale = true
-					break
+					return true, nil
 				}
 			}
+
 			if fileExists(config.manifestFile) {
 				manifests, err := readNonEmptyLines(config.manifestFile)
 				if err != nil {
@@ -557,22 +568,20 @@ func isStale(options *allOpts, config t4cConfig, configPaths []string) (bool, er
 				}
 				for _, manifest := range manifests {
 					if !fileExists(manifest) {
-						stale = true
-						break
+						return true, nil
 					}
 					newer, err := checkIsNewerFile(manifest, config.cpFile)
 					if err != nil {
 						return false, err
 					}
 					if newer {
-						stale = true
-						break
+						return true, nil
 					}
 				}
 			}
 		}
 	}
-	return stale, nil
+	return false, nil
 }
 
 func buildToolsArgs(config *t4cConfig, stale bool, options *allOpts) {
