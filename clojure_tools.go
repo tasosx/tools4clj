@@ -93,10 +93,12 @@ main-opt:
   -h, -?, --help      Print this help message and exit
 
 Programs provided by :deps alias:
-  -X:deps mvn-install       Install a maven jar to the local repository cache
-  -X:deps git-resolve-tags  Resolve git coord tags to shas and update deps.edn
+  -X:deps list              List full transitive deps set and licenses
+  -X:deps tree              Print deps tree
   -X:deps find-versions     Find available versions of a library
   -X:deps prep              Prepare all unprepped libs in the dep tree
+  -X:deps mvn-install       Install a maven jar to the local repository cache
+  -X:deps git-resolve-tags  Resolve git coord tags to shas and update deps.edn
 
 ---
 
@@ -113,7 +115,7 @@ For more info, see:
 `
 
 const (
-	version        = "1.11.1.1182"
+	version        = "1.11.1.1189"
 	depsEDN        = "deps.edn"
 	exampleDepsEDN = "example-deps.edn"
 	cljToolsEDN    = "tools.edn"
