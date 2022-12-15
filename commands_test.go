@@ -45,9 +45,11 @@ func TestMakeClassPathCmd(t *testing.T) {
 	// test args
 	{
 		expected := []string{
-			javaPath, "-classpath", toolsCpDir,
+			javaPath,
+			"-XX:-OmitStackTraceInFastThrow",
+			"-classpath", toolsCpDir,
 			"clojure.main",
-			"-m", "clojure.tools.deps.alpha.script.make-classpath2",
+			"-m", "clojure.tools.deps.script.make-classpath2",
 			"--config-user", conf.configUser,
 			"--config-project", conf.configProject,
 			"--libs-file", conf.libsFile,
@@ -82,9 +84,11 @@ func TestMakeClassPathCmd(t *testing.T) {
 	// test args
 	{
 		expected := []string{
-			javaPath, "CLJ_JVM_OPTS_VALUE", "-classpath", toolsCpDir,
+			javaPath,
+			"-XX:-OmitStackTraceInFastThrow",
+			"CLJ_JVM_OPTS_VALUE", "-classpath", toolsCpDir,
 			"clojure.main",
-			"-m", "clojure.tools.deps.alpha.script.make-classpath2",
+			"-m", "clojure.tools.deps.script.make-classpath2",
 			"--config-user", conf.configUser,
 			"--config-project", conf.configProject,
 			"--libs-file", conf.libsFile,
@@ -134,9 +138,11 @@ func TestGeneratePomCmd(t *testing.T) {
 	// test args
 	{
 		expected := []string{
-			javaPath, "-classpath", toolsCpDir,
+			javaPath,
+			"-XX:-OmitStackTraceInFastThrow",
+			"-classpath", toolsCpDir,
 			"clojure.main",
-			"-m", "clojure.tools.deps.alpha.script.generate-manifest2",
+			"-m", "clojure.tools.deps.script.generate-manifest2",
 			"--config-user", conf.configUser,
 			"--config-project", conf.configProject,
 			"--gen=pom",
@@ -171,9 +177,11 @@ func TestGeneratePomCmd(t *testing.T) {
 	// test args
 	{
 		expected := []string{
-			javaPath, "CLJ_JVM_OPTS_VALUE", "-classpath", toolsCpDir,
+			javaPath,
+			"-XX:-OmitStackTraceInFastThrow",
+			"CLJ_JVM_OPTS_VALUE", "-classpath", toolsCpDir,
 			"clojure.main",
-			"-m", "clojure.tools.deps.alpha.script.generate-manifest2",
+			"-m", "clojure.tools.deps.script.generate-manifest2",
 			"--config-user", conf.configUser,
 			"--config-project", conf.configProject,
 			"--gen=pom",
@@ -218,6 +226,7 @@ func TestClojureExecuteCmd(t *testing.T) {
 
 		expected := []string{javaPath}
 
+		expected = append(expected, "-XX:-OmitStackTraceInFastThrow")
 		expected = append(expected, jvmCacheOpts...)
 		expected = append(expected, jvmOpts...)
 		expected = append(expected, "-Dclojure.basis="+conf.basisFile,
@@ -247,6 +256,7 @@ func TestClojureExecuteCmd(t *testing.T) {
 
 		expected := []string{javaPath}
 
+		expected = append(expected, "-XX:-OmitStackTraceInFastThrow")
 		expected = append(expected, jvmCacheOpts...)
 		expected = append(expected, jvmOpts...)
 		expected = append(expected, "-Dclojure.basis="+conf.basisFile,
@@ -277,6 +287,7 @@ func TestClojureExecuteCmd(t *testing.T) {
 
 		expected := []string{javaPath}
 
+		expected = append(expected, "-XX:-OmitStackTraceInFastThrow")
 		expected = append(expected, jvmCacheOpts...)
 		expected = append(expected, jvmOpts...)
 		expected = append(expected, "-Dclojure.basis="+conf.basisFile,
@@ -307,6 +318,7 @@ func TestClojureExecuteCmd(t *testing.T) {
 
 		expected := []string{javaPath}
 
+		expected = append(expected, "-XX:-OmitStackTraceInFastThrow")
 		expected = append(expected, jvmCacheOpts...)
 		expected = append(expected, jvmOpts...)
 		expected = append(expected, "-Dclojure.basis="+conf.basisFile,
@@ -341,6 +353,7 @@ func TestClojureExecuteCmd(t *testing.T) {
 
 		expected := []string{javaPath}
 
+		expected = append(expected, "-XX:-OmitStackTraceInFastThrow")
 		expected = append(expected, "JAVA_OPTS_VALUE")
 		expected = append(expected, jvmCacheOpts...)
 		expected = append(expected, jvmOpts...)
@@ -393,6 +406,7 @@ func TestClojureCmd(t *testing.T) {
 		cp, mainCacheOpts, clojureArgs, false)
 
 	{
+		expected = append(expected, "-XX:-OmitStackTraceInFastThrow")
 		expected = append(expected, jvmCacheOpts...)
 		expected = append(expected, jvmOpts...)
 		expected = append(expected, "-Dclojure.libfile="+conf.libsFile, "-Dclojure.basisfile="+conf.basisFile, "-classpath", cp, "clojure.main")
@@ -445,6 +459,7 @@ func TestClojureCmd(t *testing.T) {
 
 	{
 		expected = []string{javaPath}
+		expected = append(expected, "-XX:-OmitStackTraceInFastThrow")
 		expected = append(expected, "JAVA_OPTS_VALUE")
 		expected = append(expected, jvmCacheOpts...)
 		expected = append(expected, jvmOpts...)

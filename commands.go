@@ -21,9 +21,12 @@ import (
 )
 
 func makeClassPathCmd(conf *t4cConfig, toolsClassPath string) exec.Cmd {
-	cmdArgs := append([]string{}, os.Getenv("CLJ_JVM_OPTS"), "-classpath", toolsClassPath,
+	cmdArgs := append([]string{},
+		"-XX:-OmitStackTraceInFastThrow",
+		os.Getenv("CLJ_JVM_OPTS"),
+		"-classpath", toolsClassPath,
 		"clojure.main",
-		"-m", "clojure.tools.deps.alpha.script.make-classpath2",
+		"-m", "clojure.tools.deps.script.make-classpath2",
 		"--config-user", conf.configUser,
 		"--config-project", conf.configProject,
 		"--libs-file", conf.libsFile,
@@ -42,9 +45,12 @@ func makeClassPathCmd(conf *t4cConfig, toolsClassPath string) exec.Cmd {
 }
 
 func generatePomCmd(conf *t4cConfig, toolsClassPath string) exec.Cmd {
-	cmdArgs := append([]string{}, os.Getenv("CLJ_JVM_OPTS"), "-classpath", toolsClassPath,
+	cmdArgs := append([]string{},
+		"-XX:-OmitStackTraceInFastThrow",
+		os.Getenv("CLJ_JVM_OPTS"),
+		"-classpath", toolsClassPath,
 		"clojure.main",
-		"-m", "clojure.tools.deps.alpha.script.generate-manifest2",
+		"-m", "clojure.tools.deps.script.generate-manifest2",
 		"--config-user", conf.configUser,
 		"--config-project", conf.configProject,
 		"--gen=pom")
@@ -60,7 +66,9 @@ func generatePomCmd(conf *t4cConfig, toolsClassPath string) exec.Cmd {
 func clojureExecuteCmd(jvmCacheOpts []string, jvmOpts []string, basisFile string,
 	execJarPath string, cp string, args []string) exec.Cmd {
 
-	cmdArgs := append([]string{}, os.Getenv("JAVA_OPTS"))
+	cmdArgs := append([]string{},
+		"-XX:-OmitStackTraceInFastThrow",
+		os.Getenv("JAVA_OPTS"))
 	cmdArgs = append(cmdArgs, jvmCacheOpts...)
 	cmdArgs = append(cmdArgs, jvmOpts...)
 	cmdArgs = append(cmdArgs, "-Dclojure.basis="+basisFile,
@@ -78,7 +86,9 @@ func clojureExecuteCmd(jvmCacheOpts []string, jvmOpts []string, basisFile string
 func clojureCmd(jvmCacheOpts []string, jvmOpts []string, libsFile string, basisFile string,
 	cp string, mainCacheOpts []string, clojureArgs []string, rlwrap bool) exec.Cmd {
 
-	cmdArgs := append([]string{}, os.Getenv("JAVA_OPTS"))
+	cmdArgs := append([]string{},
+		"-XX:-OmitStackTraceInFastThrow",
+		os.Getenv("JAVA_OPTS"))
 	cmdArgs = append(cmdArgs, jvmCacheOpts...)
 	cmdArgs = append(cmdArgs, jvmOpts...)
 	cmdArgs = append(cmdArgs, "-Dclojure.libfile="+libsFile, "-Dclojure.basisfile="+basisFile, "-classpath", cp, "clojure.main")
