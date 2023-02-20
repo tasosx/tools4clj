@@ -21,6 +21,7 @@ import (
 func TestRlwrapArgs(t *testing.T) {
 	expected := []string{
 		"rlwrap",
+		"-m",
 		"-r",
 		"-q",
 		`"`,

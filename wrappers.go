@@ -22,6 +22,7 @@ const (
 func rlwrapArgs() []string {
 	return []string{
 		"rlwrap",
+		"-m",
 		"-r",
 		"-q",
 		`"`,

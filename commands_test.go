@@ -429,7 +429,6 @@ func TestClojureCmd(t *testing.T) {
 	// test clj (rlwrap'ed) args
 	cmd = clojureCmd(jvmCacheOpts, jvmOpts, conf.libsFile, conf.basisFile,
 		cp, mainCacheOpts, clojureArgs, true)
-
 	{
 		expectedWrapped := []string{javaPath}
 
