@@ -35,27 +35,25 @@ type allOpts struct {
 }
 
 type cljOpts struct {
-	JvmOpts          []string
-	MainAliases      string
-	ResolveAliases   string
-	ClassPathAliases string
-	ReplAliases      []string
-	ToolAliases      string
-	ToolName         string
-	ExecAliases      string
-	DepsData         string
-	PrintClassPath   bool
-	ForceCP          string
-	Prep             bool
-	Repro            bool
-	Pom              bool
-	Tree             bool
-	Force            bool
-	Verbose          bool
-	Describe         bool
-	Threads          int
-	Trace            bool
-	InvalidOption    string
+	JvmOpts        []string
+	MainAliases    string
+	ReplAliases    []string
+	ToolAliases    string
+	ToolName       string
+	ExecAliases    string
+	DepsData       string
+	PrintClassPath bool
+	ForceCP        string
+	Prep           bool
+	Repro          bool
+	Pom            bool
+	Tree           bool
+	Force          bool
+	Verbose        bool
+	Describe       bool
+	Threads        int
+	Trace          bool
+	InvalidOption  string
 }
 
 type initOpts struct {
@@ -172,13 +170,11 @@ func setCljOpts(all *allOpts, args []string, pos int) (int, error) {
 		} else if strings.HasPrefix(args[pos], "-J") {
 			all.Clj.JvmOpts = append(all.Clj.JvmOpts, strings.TrimPrefix(args[pos], "-J"))
 		} else if strings.HasPrefix(args[pos], "-R") {
-			all.Clj.ResolveAliases += strings.TrimPrefix(args[pos], "-R")
-			fmt.Fprintln(os.Stderr, "-R is deprecated, use -A with repl, -M for main, or -X for exec")
+			return pos, errors.New("-R is no longer supported, use -A with repl, -M for main, -X for exec, -T for tool")
 		} else if strings.HasPrefix(args[pos], "-C") {
-			all.Clj.ClassPathAliases += strings.TrimPrefix(args[pos], "-C")
-			fmt.Fprintln(os.Stderr, "-C is deprecated, use -A with repl, -M for main, or -X for exec")
+			return pos, errors.New("-C is no longer supported, use -A with repl, -M for main, -X for exec, -T for tool")
 		} else if strings.HasPrefix(args[pos], "-O") {
-			return pos, errors.New("-O is no longer supported, use -A with repl, -M for main, or -X for exec")
+			return pos, errors.New("-O is no longer supported, use -A with repl, -M for main, -X for exec, -T for tool")
 		} else if args[pos] == "-A" {
 			return pos, errors.New("-A requires an alias")
 		} else if strings.HasPrefix(args[pos], "-A") {
@@ -403,7 +399,7 @@ func use(options *allOpts) error {
 	ck := checksumOf(options, configPaths)
 
 	// Build the file parameters:
-	// libsFile, cpFile, jvmFile, mainFile
+	// cpFile, jvmFile, mainFile
 	buildCmdConfigs(&config, cacheDir, ck)
 
 	if options.Clj.Verbose {
@@ -489,8 +485,7 @@ func use(options *allOpts) error {
 		clojureArgs = append(clojureArgs, options.Args...)
 
 		err = safeStart(clojureCmd(jvmCacheOpts, options.Clj.JvmOpts,
-			config.libsFile, config.basisFile,
-			cp, mainCacheOpts, clojureArgs, options.Rlwrap))
+			config.basisFile, cp, mainCacheOpts, clojureArgs, options.Rlwrap))
 		if err != nil {
 			return err
 		}
@@ -500,9 +495,9 @@ func use(options *allOpts) error {
 }
 
 func checksumOf(options *allOpts, configPaths []string) string {
+	var cacheVersion = "3"
 	prep := join([]string{
-		options.Clj.ResolveAliases,
-		options.Clj.ClassPathAliases,
+		cacheVersion,
 		join(options.Clj.ReplAliases, ""),
 		options.Clj.ExecAliases,
 		options.Clj.MainAliases,
@@ -589,12 +584,6 @@ func buildToolsArgs(config *t4cConfig, stale bool, options *allOpts) {
 		config.toolsArgs = []string{}
 		if len(options.Clj.DepsData) > 0 {
 			config.toolsArgs = append(config.toolsArgs, "--config-data", options.Clj.DepsData)
-		}
-		if len(options.Clj.ResolveAliases) > 0 {
-			config.toolsArgs = append(config.toolsArgs, "-R"+options.Clj.ResolveAliases)
-		}
-		if len(options.Clj.ClassPathAliases) > 0 {
-			config.toolsArgs = append(config.toolsArgs, "-C"+options.Clj.ClassPathAliases)
 		}
 		if len(options.Clj.MainAliases) > 0 {
 			config.toolsArgs = append(config.toolsArgs, "-M"+options.Clj.MainAliases)

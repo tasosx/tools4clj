@@ -358,8 +358,6 @@ var testDepItems = []TestReadItem{
 	{ // more Dep options
 		[]string{"clojure",
 			"-JargJ",
-			"-R:argR",
-			"-C:argC",
 			"-A:argA",
 			"-Sdeps",
 			`{:deps {clansi {:mvn/version "1.0.0"}}}`,
@@ -378,21 +376,19 @@ var testDepItems = []TestReadItem{
 		},
 		allOpts{
 			Clj: cljOpts{
-				JvmOpts:          []string{"argJ"},
-				ResolveAliases:   ":argR",
-				ClassPathAliases: ":argC",
-				ReplAliases:      []string{":argA"},
-				DepsData:         `{:deps {clansi {:mvn/version "1.0.0"}}}`,
-				PrintClassPath:   true,
-				ForceCP:          `src:target:/classpath`,
-				Repro:            true,
-				Force:            true,
-				Pom:              true,
-				Tree:             true,
-				Verbose:          true,
-				Describe:         true,
-				Threads:          42,
-				Trace:            true,
+				JvmOpts:        []string{"argJ"},
+				ReplAliases:    []string{":argA"},
+				DepsData:       `{:deps {clansi {:mvn/version "1.0.0"}}}`,
+				PrintClassPath: true,
+				ForceCP:        `src:target:/classpath`,
+				Repro:          true,
+				Force:          true,
+				Pom:            true,
+				Tree:           true,
+				Verbose:        true,
+				Describe:       true,
+				Threads:        42,
+				Trace:          true,
 			},
 			Init:       initOpts{},
 			Main:       mainOpts{},
@@ -406,18 +402,14 @@ var testDepItems = []TestReadItem{
 	{ // multiple Dep options
 		[]string{"clojure",
 			"-JargJ1", "-JargJ2",
-			"-R:argR1", "-R:argR2",
-			"-C:argC1", "-C:argC2",
 			"-A:argA1", "-A:argA2",
 			"-M:argM1",
 		},
 		allOpts{
 			Clj: cljOpts{
-				JvmOpts:          []string{"argJ1", "argJ2"},
-				ResolveAliases:   ":argR1:argR2",
-				ClassPathAliases: ":argC1:argC2",
-				ReplAliases:      []string{":argA1", ":argA2"},
-				MainAliases:      ":argM1",
+				JvmOpts:     []string{"argJ1", "argJ2"},
+				ReplAliases: []string{":argA1", ":argA2"},
+				MainAliases: ":argM1",
 			},
 			Init:       initOpts{},
 			Main:       mainOpts{},
@@ -721,6 +713,36 @@ var testDepItems = []TestReadItem{
 		},
 		"",
 	},
+	{ // not supported: -R
+		[]string{"clojure",
+			"-R:argR",
+		},
+		allOpts{
+			Clj:        cljOpts{},
+			Init:       initOpts{},
+			Main:       mainOpts{},
+			Args:       []string{},
+			NativeArgs: true,
+			Rlwrap:     false,
+			Mode:       "repl",
+		},
+		"-R is no longer supported, use -A with repl, -M for main, -X for exec, -T for tool",
+	},
+	{ // not supported: -C
+		[]string{"clojure",
+			"-C:argC",
+		},
+		allOpts{
+			Clj:        cljOpts{},
+			Init:       initOpts{},
+			Main:       mainOpts{},
+			Args:       []string{},
+			NativeArgs: true,
+			Rlwrap:     false,
+			Mode:       "repl",
+		},
+		"-C is no longer supported, use -A with repl, -M for main, -X for exec, -T for tool",
+	},
 	{ // not supported: -O
 		[]string{"clojure",
 			"-O:argO",
@@ -734,7 +756,7 @@ var testDepItems = []TestReadItem{
 			Rlwrap:     false,
 			Mode:       "repl",
 		},
-		"-O is no longer supported, use -A with repl, -M for main, or -X for exec",
+		"-O is no longer supported, use -A with repl, -M for main, -X for exec, -T for tool",
 	},
 	{ // not supported: -Sresolve-tags
 		[]string{"clojure",
@@ -1096,7 +1118,7 @@ func TestChecksumOf(t *testing.T) {
 		"filepath2.edn",
 	}
 	// output
-	expected := "3742641631"
+	expected := "3313649687"
 
 	res := checksumOf(&options, configPaths)
 	if res != expected {
@@ -1114,7 +1136,7 @@ func TestChecksumOf(t *testing.T) {
 	}
 
 	// different output is expected
-	expected = "195152154"
+	expected = "1551646034"
 
 	res = checksumOf(&options, configPaths)
 	if res != expected {
@@ -1628,18 +1650,16 @@ func TestIsStaleOnManifests(t *testing.T) {
 func TestBuildToolsArgs(t *testing.T) {
 	options := allOpts{
 		Clj: cljOpts{
-			DepsData:         `{:deps {clansi {:mvn/version "1.0.0"}}}`,
-			ResolveAliases:   ":argR",
-			ClassPathAliases: ":argC",
-			MainAliases:      ":argM",
-			ReplAliases:      []string{":argA"},
-			ToolName:         "MyTool",
-			ToolAliases:      ":argT",
-			ExecAliases:      ":argX",
-			ForceCP:          "forced-class-path",
-			Pom:              false,
-			Threads:          42,
-			Trace:            true,
+			DepsData:    `{:deps {clansi {:mvn/version "1.0.0"}}}`,
+			MainAliases: ":argM",
+			ReplAliases: []string{":argA"},
+			ToolName:    "MyTool",
+			ToolAliases: ":argT",
+			ExecAliases: ":argX",
+			ForceCP:     "forced-class-path",
+			Pom:         false,
+			Threads:     42,
+			Trace:       true,
 		},
 	}
 	config := t4cConfig{}
@@ -1665,8 +1685,6 @@ func TestBuildToolsArgs(t *testing.T) {
 	expected = []string{
 		"--config-data",
 		`{:deps {clansi {:mvn/version "1.0.0"}}}`,
-		"-R:argR",
-		"-C:argC",
 		"-M:argM",
 		"-A:argA",
 		"-X:argX",
@@ -1693,8 +1711,6 @@ func TestBuildToolsArgs(t *testing.T) {
 	expected = []string{
 		"--config-data",
 		`{:deps {clansi {:mvn/version "1.0.0"}}}`,
-		"-R:argR",
-		"-C:argC",
 		"-M:argM",
 		"-A:argA",
 		"-X:argX",
@@ -1721,8 +1737,6 @@ func TestBuildToolsArgs(t *testing.T) {
 	expected = []string{
 		"--config-data",
 		`{:deps {clansi {:mvn/version "1.0.0"}}}`,
-		"-R:argR",
-		"-C:argC",
 		"-M:argM",
 		"-A:argA",
 		"-X:argX",
@@ -1750,8 +1764,6 @@ func TestBuildToolsArgs(t *testing.T) {
 	expected = []string{
 		"--config-data",
 		`{:deps {clansi {:mvn/version "1.0.0"}}}`,
-		"-R:argR",
-		"-C:argC",
 		"-M:argM",
 		"-A:argA",
 		"-X:argX",
@@ -1886,12 +1898,10 @@ func TestArgsDescription(t *testing.T) {
 	}
 	options := allOpts{
 		Clj: cljOpts{
-			Force:            true,
-			Repro:            true,
-			ResolveAliases:   ":argR",
-			ClassPathAliases: ":argC",
-			MainAliases:      ":argM",
-			ReplAliases:      []string{":argA"},
+			Force:       true,
+			Repro:       true,
+			MainAliases: ":argM",
+			ReplAliases: []string{":argA"},
 		},
 	}
 	// output

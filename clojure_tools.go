@@ -50,7 +50,7 @@ in a terminal, and should be preferred unless you don't want that support,
 then use 'clojure'.
 
 Usage:
-  Start a REPL   clj     [t4c-opt*] [clj-opt*] [-Aaliases] [init-opt*]
+  Start a REPL   clj     [clj-opt*] [-Aaliases]
   Exec fn(s)     clojure [clj-opt*] -X[aliases] a/fn? [kpath v]* kv-map?
   Run tool       clojure [clj-opt*] -T[name|aliases] a/fn [kpath v] kv-map?
   Run main       clojure [t4c-opt*] [clj-opt*] -M[aliases] [init-opt*] [main-opt] [arg*]
@@ -115,7 +115,7 @@ For more info, see:
 `
 
 const (
-	version        = "1.11.1.1224"
+	version        = "1.11.1.1252"
 	depsEDN        = "deps.edn"
 	exampleDepsEDN = "example-deps.edn"
 	cljToolsEDN    = "tools.edn"
@@ -138,7 +138,6 @@ var (
 type t4cConfig struct {
 	configUser    string
 	configProject string
-	libsFile      string
 	cpFile        string
 	jvmFile       string
 	mainFile      string
@@ -148,7 +147,6 @@ type t4cConfig struct {
 }
 
 func buildCmdConfigs(conf *t4cConfig, cacheDir string, ck string) {
-	conf.libsFile = path.Join(cacheDir, ck+".libs")
 	conf.cpFile = path.Join(cacheDir, ck+".cp")
 	conf.jvmFile = path.Join(cacheDir, ck+".jvm")
 	conf.mainFile = path.Join(cacheDir, ck+".main")

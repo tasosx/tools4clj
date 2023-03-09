@@ -29,7 +29,6 @@ func makeClassPathCmd(conf *t4cConfig, toolsClassPath string) exec.Cmd {
 		"-m", "clojure.tools.deps.script.make-classpath2",
 		"--config-user", conf.configUser,
 		"--config-project", conf.configProject,
-		"--libs-file", conf.libsFile,
 		"--basis-file", conf.basisFile,
 		"--cp-file", conf.cpFile,
 		"--jvm-file", conf.jvmFile,
@@ -83,7 +82,7 @@ func clojureExecuteCmd(jvmCacheOpts []string, jvmOpts []string, basisFile string
 	return *cmd
 }
 
-func clojureCmd(jvmCacheOpts []string, jvmOpts []string, libsFile string, basisFile string,
+func clojureCmd(jvmCacheOpts []string, jvmOpts []string, basisFile string,
 	cp string, mainCacheOpts []string, clojureArgs []string, rlwrap bool) exec.Cmd {
 
 	cmdArgs := append([]string{},
@@ -91,7 +90,7 @@ func clojureCmd(jvmCacheOpts []string, jvmOpts []string, libsFile string, basisF
 		os.Getenv("JAVA_OPTS"))
 	cmdArgs = append(cmdArgs, jvmCacheOpts...)
 	cmdArgs = append(cmdArgs, jvmOpts...)
-	cmdArgs = append(cmdArgs, "-Dclojure.libfile="+libsFile, "-Dclojure.basisfile="+basisFile, "-classpath", cp, "clojure.main")
+	cmdArgs = append(cmdArgs, "-Dclojure.basisfile="+basisFile, "-classpath", cp, "clojure.main")
 	cmdArgs = append(cmdArgs, mainCacheOpts...)
 	cmdArgs = append(cmdArgs, clojureArgs...)
 

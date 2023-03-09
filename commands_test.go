@@ -25,7 +25,6 @@ func TestMakeClassPathCmd(t *testing.T) {
 	conf := t4cConfig{
 		configUser:    "test-config-user",
 		configProject: "test-config-project",
-		libsFile:      "test-libs-file",
 		basisFile:     "test-basis-file",
 		cpFile:        "test-cp-file",
 		jvmFile:       "test-jvm-file",
@@ -52,7 +51,6 @@ func TestMakeClassPathCmd(t *testing.T) {
 			"-m", "clojure.tools.deps.script.make-classpath2",
 			"--config-user", conf.configUser,
 			"--config-project", conf.configProject,
-			"--libs-file", conf.libsFile,
 			"--basis-file", conf.basisFile,
 			"--cp-file", conf.cpFile,
 			"--jvm-file", conf.jvmFile,
@@ -91,7 +89,6 @@ func TestMakeClassPathCmd(t *testing.T) {
 			"-m", "clojure.tools.deps.script.make-classpath2",
 			"--config-user", conf.configUser,
 			"--config-project", conf.configProject,
-			"--libs-file", conf.libsFile,
 			"--basis-file", conf.basisFile,
 			"--cp-file", conf.cpFile,
 			"--jvm-file", conf.jvmFile,
@@ -120,7 +117,6 @@ func TestGeneratePomCmd(t *testing.T) {
 	conf := t4cConfig{
 		configUser:    "test-config-user",
 		configProject: "test-config-project",
-		libsFile:      "test-libs-file",
 		cpFile:        "test-cp-file",
 		jvmFile:       "test-jvm-file",
 		mainFile:      "test-main-file",
@@ -386,9 +382,7 @@ func TestClojureCmd(t *testing.T) {
 		"-jvmOpts",
 		"test",
 	}
-	conf := t4cConfig{
-		libsFile: "test-libs-file",
-	}
+	conf := t4cConfig{}
 	cp := "test-class-path"
 	mainCacheOpts := []string{
 		"-mainCacheOpts",
@@ -402,14 +396,14 @@ func TestClojureCmd(t *testing.T) {
 	expected := []string{javaPath}
 
 	// test clojure args
-	cmd := clojureCmd(jvmCacheOpts, jvmOpts, conf.libsFile, conf.basisFile,
+	cmd := clojureCmd(jvmCacheOpts, jvmOpts, conf.basisFile,
 		cp, mainCacheOpts, clojureArgs, false)
 
 	{
 		expected = append(expected, "-XX:-OmitStackTraceInFastThrow")
 		expected = append(expected, jvmCacheOpts...)
 		expected = append(expected, jvmOpts...)
-		expected = append(expected, "-Dclojure.libfile="+conf.libsFile, "-Dclojure.basisfile="+conf.basisFile, "-classpath", cp, "clojure.main")
+		expected = append(expected, "-Dclojure.basisfile="+conf.basisFile, "-classpath", cp, "clojure.main")
 		expected = append(expected, mainCacheOpts...)
 		expected = append(expected, clojureArgs...)
 		expected = removeEmpty(expected)
@@ -427,7 +421,7 @@ func TestClojureCmd(t *testing.T) {
 	}
 
 	// test clj (rlwrap'ed) args
-	cmd = clojureCmd(jvmCacheOpts, jvmOpts, conf.libsFile, conf.basisFile,
+	cmd = clojureCmd(jvmCacheOpts, jvmOpts, conf.basisFile,
 		cp, mainCacheOpts, clojureArgs, true)
 	{
 		expectedWrapped := []string{javaPath}
@@ -451,7 +445,7 @@ func TestClojureCmd(t *testing.T) {
 	// test clojure args, when JAVA_OPTS environment variable is set
 	os.Setenv("JAVA_OPTS", "JAVA_OPTS_VALUE")
 
-	cmd = clojureCmd(jvmCacheOpts, jvmOpts, conf.libsFile, conf.basisFile,
+	cmd = clojureCmd(jvmCacheOpts, jvmOpts, conf.basisFile,
 		cp, mainCacheOpts, clojureArgs, false)
 
 	os.Unsetenv("JAVA_OPTS")
@@ -462,7 +456,7 @@ func TestClojureCmd(t *testing.T) {
 		expected = append(expected, "JAVA_OPTS_VALUE")
 		expected = append(expected, jvmCacheOpts...)
 		expected = append(expected, jvmOpts...)
-		expected = append(expected, "-Dclojure.libfile="+conf.libsFile, "-Dclojure.basisfile="+conf.basisFile, "-classpath", cp, "clojure.main")
+		expected = append(expected, "-Dclojure.basisfile="+conf.basisFile, "-classpath", cp, "clojure.main")
 		expected = append(expected, mainCacheOpts...)
 		expected = append(expected, clojureArgs...)
 		expected = removeEmpty(expected)
@@ -482,7 +476,7 @@ func TestClojureCmd(t *testing.T) {
 	// test clj (rlwrap'ed) args, when JAVA_OPTS environment variable is set
 	os.Setenv("JAVA_OPTS", "JAVA_OPTS_VALUE")
 
-	cmd = clojureCmd(jvmCacheOpts, jvmOpts, conf.libsFile, conf.basisFile,
+	cmd = clojureCmd(jvmCacheOpts, jvmOpts, conf.basisFile,
 		cp, mainCacheOpts, clojureArgs, true)
 
 	os.Unsetenv("JAVA_OPTS")

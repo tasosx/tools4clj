@@ -21,7 +21,6 @@ import (
 
 func TestBuildCmdConfigs(t *testing.T) {
 	conf := t4cConfig{
-		libsFile:     "",
 		cpFile:       "",
 		jvmFile:      "",
 		mainFile:     "",
@@ -35,12 +34,7 @@ func TestBuildCmdConfigs(t *testing.T) {
 	ck := "00000000"
 	buildCmdConfigs(&conf, testCacheDir, ck)
 
-	expected := path.Join(testCacheDir, ck+".libs")
-	if conf.libsFile != expected {
-		t.Errorf("build cmd configs failed, libsFile expected %v, got %v", expected, conf.libsFile)
-	}
-
-	expected = path.Join(testCacheDir, ck+".cp")
+	expected := path.Join(testCacheDir, ck+".cp")
 	if conf.cpFile != expected {
 		t.Errorf("build cmd configs failed, cpFile expected %v, got %v", expected, conf.cpFile)
 	}
