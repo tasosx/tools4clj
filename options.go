@@ -495,7 +495,7 @@ func use(options *allOpts) error {
 }
 
 func checksumOf(options *allOpts, configPaths []string) string {
-	var cacheVersion = "3"
+	var cacheVersion = "4"
 	prep := join([]string{
 		cacheVersion,
 		join(options.Clj.ReplAliases, ""),

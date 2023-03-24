@@ -1118,7 +1118,7 @@ func TestChecksumOf(t *testing.T) {
 		"filepath2.edn",
 	}
 	// output
-	expected := "3313649687"
+	expected := "3739976830"
 
 	res := checksumOf(&options, configPaths)
 	if res != expected {
@@ -1136,7 +1136,7 @@ func TestChecksumOf(t *testing.T) {
 	}
 
 	// different output is expected
-	expected = "1551646034"
+	expected = "2231406864"
 
 	res = checksumOf(&options, configPaths)
 	if res != expected {
