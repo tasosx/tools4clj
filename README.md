@@ -4,7 +4,7 @@
 In the shadows of the official clojure tools:
 
 ```
-const version = "1.11.1.1273"
+const version = "1.11.1.1347"
 ```
 
 
