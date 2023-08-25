@@ -115,12 +115,12 @@ For more info, see:
 `
 
 const (
-	version        = "1.11.1.1347"
+	version        = "1.11.1.1405"
 	depsEDN        = "deps.edn"
 	exampleDepsEDN = "example-deps.edn"
 	cljToolsEDN    = "tools.edn"
 	toolsTarGz     = "clojure-tools-" + version + ".tar.gz"
-	toolsURL       = "https://download.clojure.org/install/" + toolsTarGz
+	toolsURL       = "https://github.com/clojure/brew-install/releases/download/" + version + "/" + toolsTarGz
 	toolsJar       = "clojure-tools-" + version + ".jar"
 	libexecDir     = "libexec"
 	execJar        = "exec.jar"
