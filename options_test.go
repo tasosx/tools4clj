@@ -14,7 +14,6 @@ package tools4clj
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path"
 	"runtime"
@@ -1117,17 +1116,19 @@ func TestChecksumOf(t *testing.T) {
 		"filepath1.edn",
 		"filepath2.edn",
 	}
+	// empty cache dir key
+	cacheDirKey := ""
 	// output
-	expected := "3739976830"
+	expected := "1248896364"
 
-	res := checksumOf(&options, configPaths)
+	res := checksumOf(&options, configPaths, cacheDirKey)
 	if res != expected {
 		t.Errorf("checksumOf failed, expected %v, got %v", expected, res)
 	}
 
 	// create one of the defined config files
 	tmpExistingFile := "filepath1.edn"
-	err := ioutil.WriteFile(tmpExistingFile, []byte("Hello"), 0755)
+	err := os.WriteFile(tmpExistingFile, []byte("Hello"), 0755)
 	if err != nil {
 		t.Errorf("unable to write file: %v", err)
 		t.FailNow()
@@ -1136,9 +1137,20 @@ func TestChecksumOf(t *testing.T) {
 	}
 
 	// different output is expected
-	expected = "2231406864"
+	expected = "1522314413"
 
-	res = checksumOf(&options, configPaths)
+	res = checksumOf(&options, configPaths, cacheDirKey)
+	if res != expected {
+		t.Errorf("checksumOf failed, expected %v, got %v", expected, res)
+	}
+
+	// set current dir value to cacheDirKey
+	cacheDirKey = "currentdir"
+
+	// different output is expected
+	expected = "1188074545"
+
+	res = checksumOf(&options, configPaths, cacheDirKey)
 	if res != expected {
 		t.Errorf("checksumOf failed, expected %v, got %v", expected, res)
 	}
@@ -1164,7 +1176,7 @@ func TestIsStale(t *testing.T) {
 	}
 
 	// create an, older than cp, config path file
-	err = ioutil.WriteFile(olderFile, []byte("Hello"), 0755)
+	err = os.WriteFile(olderFile, []byte("Hello"), 0755)
 	if err != nil {
 		t.Errorf("unable to write file: %v", err)
 		t.FailNow()
@@ -1173,7 +1185,7 @@ func TestIsStale(t *testing.T) {
 	}
 
 	// create an, older than cp, tool file
-	err = ioutil.WriteFile(path.Join(getCljToolsDir(configDir), olderToolName+".edn"), []byte("Hello"), 0755)
+	err = os.WriteFile(path.Join(getCljToolsDir(configDir), olderToolName+".edn"), []byte("Hello"), 0755)
 	if err != nil {
 		t.Errorf("unable to write file: %v", err)
 		t.FailNow()
@@ -1184,7 +1196,7 @@ func TestIsStale(t *testing.T) {
 	time.Sleep(100 * time.Millisecond)
 
 	// create cp file
-	err = ioutil.WriteFile(cpFile, []byte("Hello"), 0755)
+	err = os.WriteFile(cpFile, []byte("Hello"), 0755)
 	if err != nil {
 		t.Errorf("unable to write file: %v", err)
 		t.FailNow()
@@ -1193,7 +1205,7 @@ func TestIsStale(t *testing.T) {
 	}
 
 	// create cp file with non existing jars
-	err = ioutil.WriteFile(cpFileWithJars, []byte("hello.jar:world.jar"), 0755)
+	err = os.WriteFile(cpFileWithJars, []byte("hello.jar:world.jar"), 0755)
 	if err != nil {
 		t.Errorf("unable to write file: %v", err)
 		t.FailNow()
@@ -1204,7 +1216,7 @@ func TestIsStale(t *testing.T) {
 	time.Sleep(100 * time.Millisecond)
 
 	// create a, newer than cp, config path file
-	err = ioutil.WriteFile(newerFile, []byte("Hello"), 0755)
+	err = os.WriteFile(newerFile, []byte("Hello"), 0755)
 	if err != nil {
 		t.Errorf("unable to write file: %v", err)
 		t.FailNow()
@@ -1213,7 +1225,7 @@ func TestIsStale(t *testing.T) {
 	}
 
 	// create a, newer than cp, tool file
-	err = ioutil.WriteFile(path.Join(getCljToolsDir(configDir), newerToolName+".edn"), []byte("Hello"), 0755)
+	err = os.WriteFile(path.Join(getCljToolsDir(configDir), newerToolName+".edn"), []byte("Hello"), 0755)
 	if err != nil {
 		t.Errorf("unable to write file: %v", err)
 		t.FailNow()
@@ -1507,7 +1519,7 @@ func TestIsStaleOnManifests(t *testing.T) {
 	nonExistingManifestName := "non_existing.edn"
 
 	// create manifests files with older/newer/non-existing content
-	err = ioutil.WriteFile(manifestsFileOlder, []byte(olderManifestName), 0755)
+	err = os.WriteFile(manifestsFileOlder, []byte(olderManifestName), 0755)
 	if err != nil {
 		t.Errorf("unable to write file: %v", err)
 		t.FailNow()
@@ -1515,7 +1527,7 @@ func TestIsStaleOnManifests(t *testing.T) {
 		defer os.Remove(manifestsFileOlder)
 	}
 
-	err = ioutil.WriteFile(manifestsFileNewer, []byte(newerManifestName), 0755)
+	err = os.WriteFile(manifestsFileNewer, []byte(newerManifestName), 0755)
 	if err != nil {
 		t.Errorf("unable to write file: %v", err)
 		t.FailNow()
@@ -1523,7 +1535,7 @@ func TestIsStaleOnManifests(t *testing.T) {
 		defer os.Remove(manifestsFileNewer)
 	}
 
-	err = ioutil.WriteFile(manifestsFileNonExisting, []byte(nonExistingManifestName), 0755)
+	err = os.WriteFile(manifestsFileNonExisting, []byte(nonExistingManifestName), 0755)
 	if err != nil {
 		t.Errorf("unable to write file: %v", err)
 		t.FailNow()
@@ -1532,7 +1544,7 @@ func TestIsStaleOnManifests(t *testing.T) {
 	}
 
 	// create an, older than cp, manifest
-	err = ioutil.WriteFile(olderManifestName, []byte("Hello"), 0755)
+	err = os.WriteFile(olderManifestName, []byte("Hello"), 0755)
 	if err != nil {
 		t.Errorf("unable to write file: %v", err)
 		t.FailNow()
@@ -1543,7 +1555,7 @@ func TestIsStaleOnManifests(t *testing.T) {
 	time.Sleep(100 * time.Millisecond)
 
 	// create cp file
-	err = ioutil.WriteFile(cpFile, []byte("Hello"), 0755)
+	err = os.WriteFile(cpFile, []byte("Hello"), 0755)
 	if err != nil {
 		t.Errorf("unable to write file: %v", err)
 		t.FailNow()
@@ -1554,7 +1566,7 @@ func TestIsStaleOnManifests(t *testing.T) {
 	time.Sleep(100 * time.Millisecond)
 
 	// create a, newer than cp, manifest file
-	err = ioutil.WriteFile(newerManifestName, []byte("Hello"), 0755)
+	err = os.WriteFile(newerManifestName, []byte("Hello"), 0755)
 	if err != nil {
 		t.Errorf("unable to write file: %v", err)
 		t.FailNow()
@@ -1797,7 +1809,7 @@ func TestActiveClassPath(t *testing.T) {
 	cpFileLargeContent := strings.Repeat("Clojure", 1+2048/len("Clojure"))
 
 	// create cp file
-	err := ioutil.WriteFile(cpFile, []byte(cpFileContent), 0755)
+	err := os.WriteFile(cpFile, []byte(cpFileContent), 0755)
 	if err != nil {
 		t.Errorf("unable to write file: %v", err)
 		t.FailNow()
@@ -1806,7 +1818,7 @@ func TestActiveClassPath(t *testing.T) {
 	}
 
 	// create large cp file (>2048 bytes)
-	err = ioutil.WriteFile(cpFileLarge, []byte(cpFileLargeContent), 0755)
+	err = os.WriteFile(cpFileLarge, []byte(cpFileLargeContent), 0755)
 	if err != nil {
 		t.Errorf("unable to write large file: %v", err)
 		t.FailNow()
@@ -1952,7 +1964,7 @@ func TestGetCacheOpts(t *testing.T) {
 	cacheOptsNotExistingFile := "not_existing_file"
 
 	// create cp file
-	err := ioutil.WriteFile(cacheOptsFile, []byte(cacheOptsFileContent), 0755)
+	err := os.WriteFile(cacheOptsFile, []byte(cacheOptsFileContent), 0755)
 	if err != nil {
 		t.Errorf("unable to write file: %v", err)
 		t.FailNow()

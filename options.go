@@ -384,19 +384,30 @@ func use(options *allOpts) error {
 
 	// Determine whether to use user or project cache
 	cacheDir := ""
+	cacheDirKey := ""
 	if fileExists("deps.edn") {
-		cacheDir = ".cpcache"
+		if !isReadOnlyDir(".") {
+			cacheDir = ".cpcache"
+		} else {
+			cacheDirKey, err = os.Getwd()
+			if err != nil {
+				return err
+			}
+			cacheDir, err = getCljCacheDir(configDir)
+			if err != nil {
+				return err
+			}
+		}
 	} else {
-		// Determine user cache directory
-		userCacheDir, err := getCljCacheDir(configDir)
+		// Use user cache directory
+		cacheDir, err = getCljCacheDir(configDir)
 		if err != nil {
 			return err
 		}
-		cacheDir = userCacheDir
 	}
 
 	// Calculate a checksum based on current options and config paths
-	ck := checksumOf(options, configPaths)
+	ck := checksumOf(options, configPaths, cacheDirKey)
 
 	// Build the file parameters:
 	// cpFile, jvmFile, mainFile
@@ -494,10 +505,11 @@ func use(options *allOpts) error {
 	return nil
 }
 
-func checksumOf(options *allOpts, configPaths []string) string {
-	var cacheVersion = "4"
+func checksumOf(options *allOpts, configPaths []string, cacheDirKey string) string {
+	var cacheVersion = "5"
 	prep := join([]string{
 		cacheVersion,
+		cacheDirKey,
 		join(options.Clj.ReplAliases, ""),
 		options.Clj.ExecAliases,
 		options.Clj.MainAliases,

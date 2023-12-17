@@ -13,7 +13,6 @@
 package tools4clj
 
 import (
-	"io/ioutil"
 	"os"
 	"path"
 	"testing"
@@ -173,7 +172,7 @@ func TestGetCljToolsDir(t *testing.T) {
 
 func TestFileExists(t *testing.T) {
 	tmpTestFile := "test-filename.txt"
-	err := ioutil.WriteFile(tmpTestFile, []byte("Hello"), 0755)
+	err := os.WriteFile(tmpTestFile, []byte("Hello"), 0755)
 	if err != nil {
 		t.Errorf("Unable to write file: %v", err)
 		t.FailNow()
@@ -209,11 +208,40 @@ func TestDirExists(t *testing.T) {
 	}
 }
 
+func TestIsReadOnlyDir(t *testing.T) {
+	tmpTestDir := "test-dir"
+	err := os.Mkdir(tmpTestDir, os.ModeDir)
+	if err != nil {
+		t.Errorf("Unable to create dir: %v", err)
+		t.FailNow()
+	} else {
+		defer os.Remove(tmpTestDir)
+	}
+
+	if !isReadOnlyDir("not-existing-" + tmpTestDir) {
+		t.Error("not existing dir... is writable!")
+	}
+
+	if !isReadOnlyDir(tmpTestDir) {
+		t.Error("created read only dir is writable")
+	}
+
+	// change mode to read-write
+	err = os.Chmod(tmpTestDir, os.ModePerm)
+	if err != nil {
+		t.Error("could not change mode to RW")
+	}
+
+	if isReadOnlyDir(tmpTestDir) {
+		t.Error("created dir is not writable")
+	}
+}
+
 func TestCopyFile(t *testing.T) {
 	tmpTestFile1 := "test-filename1.txt"
 	tmpTestFile2 := "test-filename2.txt"
 
-	err := ioutil.WriteFile(tmpTestFile1, []byte("Hello"), 0755)
+	err := os.WriteFile(tmpTestFile1, []byte("Hello"), 0755)
 	if err != nil {
 		t.Errorf("Unable to write file: %v", err)
 		t.FailNow()
@@ -245,7 +273,7 @@ func TestCheckIsNewerFile(t *testing.T) {
 
 	// --------------------------------------------------
 
-	err = ioutil.WriteFile(tmpTestFile1, []byte("Hello 1"), 0755)
+	err = os.WriteFile(tmpTestFile1, []byte("Hello 1"), 0755)
 	if err != nil {
 		t.Errorf("Unable to write file: %v", err)
 		t.FailNow()
@@ -277,7 +305,7 @@ func TestCheckIsNewerFile(t *testing.T) {
 
 	time.Sleep(100 * time.Millisecond)
 
-	err = ioutil.WriteFile(tmpTestFile2, []byte("Hello 2"), 0755)
+	err = os.WriteFile(tmpTestFile2, []byte("Hello 2"), 0755)
 	if err != nil {
 		t.Errorf("Unable to write file: %v", err)
 		t.FailNow()
