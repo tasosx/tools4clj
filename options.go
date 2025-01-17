@@ -479,7 +479,7 @@ func use(options *allOpts) error {
 		}
 	} else {
 		if options.Mode == "repl" && len(options.Args) > 0 {
-			fmt.Fprintln(os.Stderr, "WARNING: Implicit use of clojure.main with options is deprecated, use -M")
+			fmt.Fprintln(os.Stderr, "WARNING: Implicit use of clojure.main with options is deprecated, use -M $@")
 		}
 		jvmCacheOpts, err := getCacheOpts(config.jvmFile)
 		if err != nil {
@@ -506,7 +506,7 @@ func use(options *allOpts) error {
 }
 
 func checksumOf(options *allOpts, configPaths []string, cacheDirKey string) string {
-	var cacheVersion = "5"
+	var cacheVersion = "6"
 	prep := join([]string{
 		cacheVersion,
 		cacheDirKey,
