@@ -1,3 +1,3 @@
 module github.com/tasosx/tools4clj
 
-go 1.16
+go 1.23

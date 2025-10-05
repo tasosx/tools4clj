@@ -64,18 +64,19 @@ func splitToArgs(commandLine string) []string {
 	// split
 	for _, rune := range commandLine {
 		if currentRune == noRune {
-			if rune == space {
+			switch rune {
+			case space:
 				if len(arg) > 0 {
 					args = append(args, trimQuotes(arg))
 					arg = ""
 				}
-			} else if rune == quoteDouble {
+			case quoteDouble:
 				currentRune = quoteDouble
 				arg += string(rune)
-			} else if rune == quoteSingle {
+			case quoteSingle:
 				currentRune = quoteSingle
 				arg += string(rune)
-			} else {
+			default:
 				arg += string(rune)
 			}
 		} else {

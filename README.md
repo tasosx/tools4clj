@@ -4,7 +4,7 @@
 In the shadows of the official clojure tools:
 
 ```
-const version = "1.12.0.1517"
+const version = "1.12.3.1577"
 ```
 
 
@@ -93,7 +93,7 @@ https://github.com/bhauman/rebel-readline/#config
 
 ### Clojure
 
-https://clojure.org/guides/getting_started
+https://clojure.org/guides/install_clojure
 
 ### Clojure official CLI tools
 

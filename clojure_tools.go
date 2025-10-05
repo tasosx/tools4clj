@@ -65,14 +65,13 @@ exec-opts:
 
 clj-opts:
   -Jopt          Pass opt through in java_opts, ex: -J-Xmx512m
-  -Sdeps EDN     Deps data to use as the last deps file to be merged
+  -Sdeps EDN     Deps data or file to use as the last deps file to be merged
   -Spath         Compute classpath and echo to stdout only
   -Stree         Print dependency tree
   -Scp CP        Do NOT compute or cache classpath, use this one instead
   -Srepro        Ignore the ~/.clojure/deps.edn config file
   -Sforce        Force recomputation of the classpath (don't use the cache)
   -Sverbose      Print important path info to console
-  -Sdescribe     Print environment and command parsing info as data
   -Sthreads N    Set specific number of download threads
   -Strace        Write a trace.edn file that traces deps expansion
   --             Stop parsing dep options and pass remaining arguments to clojure.main
@@ -95,6 +94,7 @@ Programs provided by :deps alias:
   -X:deps aliases           List available aliases and their source
   -X:deps list              List full transitive deps set and licenses
   -X:deps tree              Print deps tree
+  -X:deps basis             Print runtime basis
   -X:deps find-versions     Find available versions of a library
   -X:deps prep              Prepare all unprepped libs in the dep tree
   -X:deps mvn-pom           Generate (or update) pom.xml with deps and paths
@@ -110,13 +110,17 @@ t4c-opt:
                no need to set it on other platforms
 
 For more info, see:
+  https://clojure.org/guides/install_clojure
   https://clojure.org/guides/deps_and_cli
+  https://clojure.org/reference/deps_edn
+  https://clojure.org/reference/clojure_cli
   https://clojure.org/reference/repl_and_main
+  -
   https://github.com/tasosx/tools4clj
 `
 
 const (
-	version        = "1.12.0.1517"
+	version        = "1.12.3.1577"
 	depsEDN        = "deps.edn"
 	exampleDepsEDN = "example-deps.edn"
 	cljToolsEDN    = "tools.edn"

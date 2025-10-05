@@ -1119,7 +1119,7 @@ func TestChecksumOf(t *testing.T) {
 	// empty cache dir key
 	cacheDirKey := ""
 	// output
-	expected := "1248896364"
+	expected := "272585735"
 
 	res := checksumOf(&options, configPaths, cacheDirKey)
 	if res != expected {
@@ -1137,7 +1137,7 @@ func TestChecksumOf(t *testing.T) {
 	}
 
 	// different output is expected
-	expected = "1522314413"
+	expected = "2234442315"
 
 	res = checksumOf(&options, configPaths, cacheDirKey)
 	if res != expected {
@@ -1148,7 +1148,7 @@ func TestChecksumOf(t *testing.T) {
 	cacheDirKey = "currentdir"
 
 	// different output is expected
-	expected = "1188074545"
+	expected = "1515385266"
 
 	res = checksumOf(&options, configPaths, cacheDirKey)
 	if res != expected {
@@ -1165,6 +1165,7 @@ func TestIsStale(t *testing.T) {
 	cpFile := "classpathFile.edn"
 	cpFileWithJars := "classpathJarsFile.edn"
 	newerFile := "newer_filepath.edn"
+	depsFile := "depsFile.edn"
 
 	// tools files to use
 	olderToolName := "older_tool"
@@ -1231,6 +1232,15 @@ func TestIsStale(t *testing.T) {
 		t.FailNow()
 	} else {
 		defer os.Remove(path.Join(getCljToolsDir(configDir), newerToolName+".edn"))
+	}
+
+	// create deps file
+	err = os.WriteFile(depsFile, []byte("HelloDeps"), 0755)
+	if err != nil {
+		t.Errorf("unable to write file: %v", err)
+		t.FailNow()
+	} else {
+		defer os.Remove(depsFile)
 	}
 
 	// forced cp
@@ -1440,6 +1450,50 @@ func TestIsStale(t *testing.T) {
 	options.Clj.Tree = false
 	options.Clj.Prep = false
 	options.Clj.ToolName = olderToolName
+	configPaths = []string{olderFile}
+	config.cpFile = cpFile
+	// output
+	expected = false
+
+	res, err = isStale(&options, config, configPaths)
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+		t.FailNow()
+	}
+	if res != expected {
+		t.Errorf("isStale failed, expected %v, got %v", expected, res)
+	}
+
+	// existing cpFile, existing deps file [different than cp file]
+	// inputs
+	options.Clj.Force = false
+	options.Clj.Trace = false
+	options.Clj.Tree = false
+	options.Clj.Prep = false
+	options.Clj.ToolName = olderToolName
+	options.Clj.DepsData = depsFile
+	configPaths = []string{olderFile}
+	config.cpFile = cpFile
+	// output
+	expected = true
+
+	res, err = isStale(&options, config, configPaths)
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+		t.FailNow()
+	}
+	if res != expected {
+		t.Errorf("isStale failed, expected %v, got %v", expected, res)
+	}
+
+	// existing cpFile, existing deps file [same as cp file]
+	// inputs
+	options.Clj.Force = false
+	options.Clj.Trace = false
+	options.Clj.Tree = false
+	options.Clj.Prep = false
+	options.Clj.ToolName = olderToolName
+	options.Clj.DepsData = cpFile
 	configPaths = []string{olderFile}
 	config.cpFile = cpFile
 	// output

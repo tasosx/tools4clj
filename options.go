@@ -123,12 +123,15 @@ func setT4COpts(all *allOpts, args []string, pos int, cljRun bool) (int, error) 
 	all.NativeArgs = (runtime.GOOS != "windows")
 
 	rebel := false
+
+out:
 	for {
 		if pos >= len(args) {
 			break
 		}
 
-		if args[pos] == "--rebel" {
+		switch args[pos] {
+		case "--rebel":
 			if !cljRun {
 				return pos, errors.New("readline option " + args[pos] + " can only be used with clj")
 			}
@@ -142,11 +145,11 @@ func setT4COpts(all *allOpts, args []string, pos int, cljRun bool) (int, error) 
 
 			rebel = true
 
-		} else if args[pos] == "--native-args" {
+		case "--native-args":
 			all.NativeArgs = true
-		} else {
+		default:
 			// move to the next options group
-			break
+			break out
 		}
 
 		pos++
@@ -418,6 +421,9 @@ func use(options *allOpts) error {
 		fmt.Fprintln(os.Stderr, "install_dir  = "+tools4CljDir)
 		fmt.Fprintln(os.Stderr, "config_dir   = "+configDir)
 		fmt.Fprintln(os.Stderr, "config_paths = "+join(configPaths, " "))
+		fmt.Fprintln(os.Stderr, "root_deps    = "+toolsCp)
+		fmt.Fprintln(os.Stderr, "user_deps    = "+config.configUser)
+		fmt.Fprintln(os.Stderr, "project_deps = "+config.configProject)
 		fmt.Fprintln(os.Stderr, "cache_dir    = "+cacheDir)
 		fmt.Fprintln(os.Stderr, "cp_file      = "+config.cpFile)
 	}
@@ -547,7 +553,7 @@ func isStale(options *allOpts, config t4cConfig, configPaths []string) (bool, er
 			return true, nil
 		} else {
 			if fileExists(config.cpFile) {
-				b, err := ioutil.ReadFile(config.cpFile)
+				b, err := os.ReadFile(config.cpFile)
 				if err != nil {
 					return false, err
 				}
@@ -585,6 +591,10 @@ func isStale(options *allOpts, config t4cConfig, configPaths []string) (bool, er
 						return true, nil
 					}
 				}
+			}
+
+			if fileExists(options.Clj.DepsData) && (options.Clj.DepsData != config.cpFile) {
+				return true, nil
 			}
 		}
 	}
