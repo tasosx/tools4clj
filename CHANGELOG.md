@@ -1,10 +1,13 @@
 # Changelog
 
 Keeping up with _clojure-tools_ changelog:
-https://github.com/clojure/brew-install/blob/1.10.1/CHANGELOG.md
+https://github.com/clojure/brew-install/blob/1.12.6/CHANGELOG.md
 
 
 ## Releases
+
+- Sixty-seventh release [2026-10-03]
+    - Based on clojure tools v.1.12.6.1673
 
 - Sixty-sixth release [2025-10-05]
     - Based on clojure tools v.1.12.3.1577
